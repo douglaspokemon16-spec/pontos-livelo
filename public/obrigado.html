@@ -177,7 +177,11 @@
         const params = new URLSearchParams(window.location.search);
         document.getElementById('pontos').textContent = params.get('pontos') || '98.570';
         document.getElementById('notificacao').innerHTML = `🔔 Notificação será enviada por ${params.get('notificacao') || 'e-mail e SMS'}`;
-        setTimeout(() => window.location.href = '/', 10000);
+        
+        // Redireciona para a página inicial após 10 segundos (opcional)
+        setTimeout(() => {
+            window.location.href = '/';
+        }, 10000);
     </script>
 </body>
 </html>
