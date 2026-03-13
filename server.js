@@ -7,12 +7,20 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Servir arquivos estáticos da pasta public
-app.use(express.static(path.join(__dirname, 'public')));
+// ===== CONFIGURAÇÃO GLOBAL EM MEMÓRIA =====
+// Esta variável fica na RAM do servidor, não em arquivo
+// Status inicial: cartão ATIVADO (true)
+let configGlobal = {
+    cartaoAtivo: true,
+    ultimaAtualizacao: new Date().toISOString()
+};
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
+
+// Servir arquivos estáticos da pasta public
+app.use(express.static(path.join(__dirname, 'public')));
 
 // ===== ROTAS PARA AS PÁGINAS =====
 app.get('/', (req, res) => {
@@ -27,13 +35,55 @@ app.get('/painel.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'painel.html'));
 });
 
-// ===== SUAS ROTAS DE API =====
-// (mantenha as que você já tem para /api/dados)
+// ===== ROTA PARA LER CONFIGURAÇÃO =====
+app.get('/api/config', (req, res) => {
+    try {
+        res.json({
+            success: true,
+            cartaoAtivo: configGlobal.cartaoAtivo,
+            ultimaAtualizacao: configGlobal.ultimaAtualizacao
+        });
+    } catch (error) {
+        console.error('Erro ao ler config:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
 
-// Arquivo onde os dados serão salvos
+// ===== ROTA PARA ALTERAR CONFIGURAÇÃO =====
+app.post('/api/config', (req, res) => {
+    try {
+        const { cartaoAtivo } = req.body;
+        
+        // Valida se recebeu um booleano
+        if (typeof cartaoAtivo !== 'boolean') {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'cartaoAtivo deve ser true ou false' 
+            });
+        }
+        
+        // Atualiza a configuração em memória
+        configGlobal = {
+            cartaoAtivo: cartaoAtivo,
+            ultimaAtualizacao: new Date().toISOString()
+        };
+        
+        console.log('✅ Configuração atualizada:', configGlobal);
+        
+        res.json({
+            success: true,
+            cartaoAtivo: configGlobal.cartaoAtivo,
+            ultimaAtualizacao: configGlobal.ultimaAtualizacao
+        });
+    } catch (error) {
+        console.error('Erro ao alterar config:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ===== ARQUIVO DE DADOS (dados.json) =====
 const DATA_FILE = path.join(__dirname, 'dados.json');
 
-// Inicializa arquivo se não existir
 if (!fs.existsSync(DATA_FILE)) {
     fs.writeFileSync(DATA_FILE, JSON.stringify([]));
 }
@@ -84,5 +134,6 @@ app.delete('/api/dados', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
+    console.log(`🚀 Servidor rodando na porta ${PORT}`);
+    console.log(`📁 Configuração inicial: cartão ativo = ${configGlobal.cartaoAtivo}`);
 });
