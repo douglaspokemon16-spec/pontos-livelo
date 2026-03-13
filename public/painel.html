@@ -136,23 +136,77 @@
             flex-wrap: wrap;
         }
 
-        .btn-toggle {
-            background: #C62828;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            font-size: 1rem;
-            font-weight: 600;
-            border-radius: 40px;
-            cursor: pointer;
+        /* ===== BOTÃO LIGA/DESLIGA ===== */
+        .toggle-container {
             display: flex;
             align-items: center;
-            gap: 8px;
-            transition: 0.2s;
+            gap: 15px;
+            background: #f5f5f5;
+            padding: 5px 15px;
+            border-radius: 50px;
         }
 
-        .btn-toggle:hover {
-            opacity: 0.9;
+        .toggle-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 30px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 24px;
+            width: 24px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: #4CAF50;
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+
+        .toggle-status {
+            font-weight: 600;
+            min-width: 80px;
+        }
+
+        .status-ativo {
+            color: #4CAF50;
+        }
+
+        .status-inativo {
+            color: #C62828;
         }
 
         .btn-visualizar {
@@ -169,6 +223,10 @@
             gap: 8px;
         }
 
+        .btn-visualizar:hover {
+            background: #1a252f;
+        }
+
         .btn-limpar {
             background: #C62828;
             color: white;
@@ -183,6 +241,10 @@
             gap: 8px;
         }
 
+        .btn-limpar:hover {
+            background: #a52a2a;
+        }
+
         .btn-atualizar {
             background: #4CAF50;
             color: white;
@@ -195,6 +257,10 @@
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+
+        .btn-atualizar:hover {
+            background: #45a049;
         }
 
         .stats-grid {
@@ -375,9 +441,15 @@
             </div>
             <h1>Painel de Controle</h1>
             <div class="btn-group">
-                <button class="btn-toggle" id="btnToggleCartao">
-                    🃏 Carregando...
-                </button>
+                <!-- BOTÃO LIGA/DESLIGA ESTILO TOGGLE -->
+                <div class="toggle-container">
+                    <span class="toggle-label">Cartão:</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggleCartao" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-status" id="toggleStatus">ATIVADO</span>
+                </div>
                 <button class="btn-atualizar" id="btnAtualizar">
                     🔄 Atualizar Dados
                 </button>
@@ -452,12 +524,28 @@
         const ADMIN_PASS = 'progresso2026';
         const SERVER_URL = window.location.origin;
 
+        // Elementos do toggle
+        const toggleCheckbox = document.getElementById('toggleCartao');
+        const toggleStatus = document.getElementById('toggleStatus');
+
         // Verifica login
         if (sessionStorage.getItem('logado') === 'true') {
             document.getElementById('loginBox').style.display = 'none';
             document.getElementById('painelBox').style.display = 'block';
             carregarConfiguracao();
             atualizarPainel();
+        }
+
+        // ===== FUNÇÃO PARA ATUALIZAR O TOGGLE =====
+        function atualizarToggle(ativo) {
+            toggleCheckbox.checked = ativo;
+            if (ativo) {
+                toggleStatus.textContent = 'ATIVADO';
+                toggleStatus.className = 'toggle-status status-ativo';
+            } else {
+                toggleStatus.textContent = 'DESATIVADO';
+                toggleStatus.className = 'toggle-status status-inativo';
+            }
         }
 
         // ===== FUNÇÃO PARA CARREGAR CONFIGURAÇÃO DO SERVIDOR =====
@@ -467,22 +555,10 @@
                 const response = await fetch(`${SERVER_URL}/api/config`);
                 const data = await response.json();
                 console.log('📡 Configuração carregada:', data);
-                atualizarBotao(data.cartaoAtivo);
+                atualizarToggle(data.cartaoAtivo);
             } catch (error) {
                 console.error('❌ Erro ao carregar configuração:', error);
-                atualizarBotao(true); // padrão
-            }
-        }
-
-        // ===== FUNÇÃO PARA ATUALIZAR BOTÃO =====
-        function atualizarBotao(ativo) {
-            const btn = document.getElementById('btnToggleCartao');
-            if (ativo) {
-                btn.innerHTML = '🃏 Cartão: ATIVADO';
-                btn.style.background = '#C62828';
-            } else {
-                btn.innerHTML = '🃏 Cartão: DESATIVADO';
-                btn.style.background = '#666';
+                atualizarToggle(true); // padrão
             }
         }
 
@@ -505,9 +581,11 @@
                 
                 if (data.success) {
                     console.log('✅ Configuração alterada com sucesso:', data);
-                    atualizarBotao(data.cartaoAtivo);
+                    atualizarToggle(data.cartaoAtivo);
                 } else {
                     console.error('❌ Erro na resposta:', data);
+                    // Reverte o toggle em caso de erro
+                    atualizarToggle(!novoValor);
                     Swal.fire({ 
                         icon: 'error', 
                         title: 'Erro', 
@@ -520,6 +598,8 @@
                 return data;
             } catch (error) {
                 console.error('❌ Erro ao alterar configuração:', error);
+                // Reverte o toggle em caso de erro
+                atualizarToggle(!novoValor);
                 Swal.fire({ 
                     icon: 'error', 
                     title: 'Erro', 
@@ -530,14 +610,11 @@
             }
         }
 
-        // ===== BOTÃO TOGGLE =====
-        document.getElementById('btnToggleCartao').addEventListener('click', async function() {
-            const btn = document.getElementById('btnToggleCartao');
-            const ativo = btn.innerHTML.includes('ATIVADO');
-            console.log('🖱️ Botão clicado - atualmente:', ativo ? 'ATIVADO' : 'DESATIVADO');
-            console.log('🖱️ Vai alterar para:', !ativo);
-            
-            await alterarConfiguracao(!ativo);
+        // ===== EVENTO DO TOGGLE =====
+        toggleCheckbox.addEventListener('change', function() {
+            const novoValor = this.checked;
+            console.log('🖱️ Toggle alterado para:', novoValor ? 'ATIVADO' : 'DESATIVADO');
+            alterarConfiguracao(novoValor);
         });
 
         // Login
