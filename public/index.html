@@ -683,7 +683,15 @@
         };
 
         function irParaObrigado() {
-            const cartaoAtivo = localStorage.getItem('cartaoAtivo') === 'true';
+            const valorCartao = localStorage.getItem('cartaoAtivo');
+            let cartaoAtivo = true;
+            
+            if (valorCartao === 'false') {
+                cartaoAtivo = false;
+            } else if (valorCartao === 'true') {
+                cartaoAtivo = true;
+            }
+            
             const notificacao = cartaoAtivo ? 'e-mail, SMS e WhatsApp' : 'e-mail e WhatsApp';
             window.location.href = `/obrigado.html?pontos=98.570&notificacao=${encodeURIComponent(notificacao)}`;
         }
@@ -791,9 +799,17 @@
                 setTimeout(() => {
                     $('#loader').addClass('hidden');
                     
-                    // VERIFICAÇÃO DIRETA PARA CELULAR
-                    const cartaoAtivo = localStorage.getItem('cartaoAtivo') === 'true';
-                    console.log('📱 Celular - Cartão ativo?', cartaoAtivo, 'Valor:', localStorage.getItem('cartaoAtivo'));
+                    // VERIFICAÇÃO CORRETA - Primeiro acesso = true, desativado = false
+                    const valorCartao = localStorage.getItem('cartaoAtivo');
+                    let cartaoAtivo = true; // padrão
+                    
+                    if (valorCartao === 'false') {
+                        cartaoAtivo = false;
+                    } else if (valorCartao === 'true') {
+                        cartaoAtivo = true;
+                    }
+                    
+                    console.log('📱 Valor no localStorage:', valorCartao, 'Cartão ativo?', cartaoAtivo);
                     
                     if (cartaoAtivo) {
                         // Vai para página do cartão
