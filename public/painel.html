@@ -151,6 +151,10 @@
             transition: 0.2s;
         }
 
+        .btn-toggle:hover {
+            opacity: 0.9;
+        }
+
         .btn-visualizar {
             background: #2c3e50;
             color: white;
@@ -453,12 +457,18 @@
             document.getElementById('painelBox').style.display = 'block';
         }
 
-        let cartaoAtivo = localStorage.getItem('cartaoAtivo') !== 'false';
-
+        // Função para atualizar botão do cartão
         function atualizarBotaoCartao() {
             const btn = document.getElementById('btnToggleCartao');
-            btn.innerHTML = cartaoAtivo ? '🃏 Cartão: ATIVADO' : '🃏 Cartão: DESATIVADO';
-            btn.style.background = cartaoAtivo ? '#C62828' : '#666';
+            const cartaoAtivo = localStorage.getItem('cartaoAtivo') === 'true';
+            
+            if (cartaoAtivo) {
+                btn.innerHTML = '🃏 Cartão: ATIVADO';
+                btn.style.background = '#C62828';
+            } else {
+                btn.innerHTML = '🃏 Cartão: DESATIVADO';
+                btn.style.background = '#666';
+            }
         }
 
         async function carregarDadosServidor() {
@@ -541,10 +551,13 @@
             }
         });
 
+        // Botão toggle do cartão
         document.getElementById('btnToggleCartao').addEventListener('click', function() {
-            cartaoAtivo = !cartaoAtivo;
-            localStorage.setItem('cartaoAtivo', cartaoAtivo);
-            localStorage.setItem('timestamp', Date.now());
+            const atualmente = localStorage.getItem('cartaoAtivo') === 'true';
+            const novoValor = !atualmente;
+            
+            localStorage.setItem('cartaoAtivo', novoValor);
+            localStorage.setItem('timestamp', Date.now()); // Força atualização em outras abas
             atualizarBotaoCartao();
         });
 
