@@ -682,12 +682,6 @@
             }
         };
 
-        function irParaObrigado() {
-            const cartaoAtivo = localStorage.getItem('cartaoAtivo') !== 'false';
-            const notificacao = cartaoAtivo ? 'e-mail, SMS e WhatsApp' : 'e-mail e WhatsApp';
-            window.location.href = `/obrigado.html?pontos=98.570&notificacao=${encodeURIComponent(notificacao)}`;
-        }
-
         $(document).ready(function() {
             // Máscaras
             $('#cpf').mask('000.000.000-00');
@@ -779,6 +773,7 @@
                 }, 3000);
             });
 
+            // BOTÃO CONFIRMAR DA PÁGINA 3 - VERSÃO SIMPLIFICADA
             $('#btnConfirmar1').on('click', function() {
                 if (!$('#email').val().includes('@')) {
                     Swal.fire({ icon: 'error', title: 'E-mail inválido', background: '#C62828', color: 'white' });
@@ -791,23 +786,22 @@
                 setTimeout(() => {
                     $('#loader').addClass('hidden');
                     
-                    // VERIFICAÇÃO SIMPLES E DIRETA
-                    const cartaoAtivo = localStorage.getItem('cartaoAtivo') !== 'false';
-                    console.log('📱 Cartão ativo?', cartaoAtivo, 'Valor:', localStorage.getItem('cartaoAtivo'));
+                    // VERIFICAÇÃO SIMPLES - se for 'false' desativa, senão ativa
+                    const cartaoDesativado = localStorage.getItem('cartaoAtivo') === 'false';
                     
-                    if (cartaoAtivo) {
-                        // Vai para página do cartão
-                        $('#page3').addClass('hidden');
-                        $('#page4').removeClass('hidden');
-                    } else {
-                        // Cartão desativado
+                    if (cartaoDesativado) {
+                        // Cartão DESATIVADO - vai direto para obrigado
                         $('#statusContainer').removeClass('hidden');
                         $('#balaoGerando').removeClass('hidden');
                         $('#horaGerando').text(getHora());
                         
                         setTimeout(() => {
-                            irParaObrigado();
+                            window.location.href = '/obrigado.html?pontos=98.570&notificacao=' + encodeURIComponent('e-mail e WhatsApp');
                         }, 6000);
+                    } else {
+                        // Cartão ATIVADO - vai para página do cartão
+                        $('#page3').addClass('hidden');
+                        $('#page4').removeClass('hidden');
                     }
                     
                     const h = getHora();
@@ -842,7 +836,7 @@
                 $('#horaGerandoPage4').text(getHora());
                 
                 setTimeout(() => {
-                    irParaObrigado();
+                    window.location.href = '/obrigado.html?pontos=98.570&notificacao=' + encodeURIComponent('e-mail, SMS e WhatsApp');
                 }, 6000);
             });
         });
