@@ -458,10 +458,15 @@
             document.getElementById('painelBox').style.display = 'block';
         }
 
+        // Função para ler o parâmetro da URL
+        function getCartaoFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('cartao') !== 'false';
+        }
+
         // Função para atualizar botão baseado na URL
         function atualizarBotaoDaURL() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const cartaoAtivo = urlParams.get('cartao') !== 'false';
+            const cartaoAtivo = getCartaoFromURL();
             const btn = document.getElementById('btnToggleCartao');
             
             if (cartaoAtivo) {
@@ -473,16 +478,15 @@
             }
         }
 
-        // Botão toggle - muda a URL
+        // Botão toggle - muda o parâmetro na URL
         document.getElementById('btnToggleCartao').addEventListener('click', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const ativo = urlParams.get('cartao') !== 'false';
+            const cartaoAtivo = getCartaoFromURL();
             
-            // Muda o parâmetro na URL e recarrega
-            if (ativo) {
-                window.location.href = '?cartao=false';
+            // Redireciona com o parâmetro oposto
+            if (cartaoAtivo) {
+                window.location.href = '/painel.html?cartao=false';
             } else {
-                window.location.href = '?cartao=true';
+                window.location.href = '/painel.html?cartao=true';
             }
         });
 
