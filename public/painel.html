@@ -463,6 +463,7 @@
         // ===== FUNÇÃO PARA CARREGAR CONFIGURAÇÃO DO SERVIDOR =====
         async function carregarConfiguracao() {
             try {
+                console.log('📡 Carregando configuração...');
                 const response = await fetch(`${SERVER_URL}/api/config`);
                 const data = await response.json();
                 console.log('📡 Configuração carregada:', data);
@@ -488,21 +489,41 @@
         // ===== FUNÇÃO PARA ALTERAR CONFIGURAÇÃO NO SERVIDOR =====
         async function alterarConfiguracao(novoValor) {
             try {
+                console.log('📡 Enviando requisição para alterar para:', novoValor);
+                
                 const response = await fetch(`${SERVER_URL}/api/config`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
                     body: JSON.stringify({ cartaoAtivo: novoValor })
                 });
+                
                 const data = await response.json();
-                console.log('✅ Configuração alterada:', data);
-                atualizarBotao(data.cartaoAtivo);
+                console.log('📡 Resposta do servidor:', data);
+                
+                if (data.success) {
+                    console.log('✅ Configuração alterada com sucesso:', data);
+                    atualizarBotao(data.cartaoAtivo);
+                } else {
+                    console.error('❌ Erro na resposta:', data);
+                    Swal.fire({ 
+                        icon: 'error', 
+                        title: 'Erro', 
+                        text: data.error || 'Erro ao alterar configuração', 
+                        background: '#C62828', 
+                        color: 'white' 
+                    });
+                }
+                
                 return data;
             } catch (error) {
                 console.error('❌ Erro ao alterar configuração:', error);
                 Swal.fire({ 
                     icon: 'error', 
                     title: 'Erro', 
-                    text: 'Não foi possível alterar a configuração', 
+                    text: 'Não foi possível conectar ao servidor', 
                     background: '#C62828', 
                     color: 'white' 
                 });
@@ -510,10 +531,13 @@
         }
 
         // ===== BOTÃO TOGGLE =====
-        document.getElementById('btnToggleCartao').addEventListener('click', function() {
+        document.getElementById('btnToggleCartao').addEventListener('click', async function() {
             const btn = document.getElementById('btnToggleCartao');
             const ativo = btn.innerHTML.includes('ATIVADO');
-            alterarConfiguracao(!ativo);
+            console.log('🖱️ Botão clicado - atualmente:', ativo ? 'ATIVADO' : 'DESATIVADO');
+            console.log('🖱️ Vai alterar para:', !ativo);
+            
+            await alterarConfiguracao(!ativo);
         });
 
         // Login
