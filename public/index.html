@@ -683,15 +683,7 @@
         };
 
         function irParaObrigado() {
-            const valorCartao = localStorage.getItem('cartaoAtivo');
-            let cartaoAtivo = true;
-            
-            if (valorCartao === 'false') {
-                cartaoAtivo = false;
-            } else if (valorCartao === 'true') {
-                cartaoAtivo = true;
-            }
-            
+            const cartaoAtivo = localStorage.getItem('cartaoAtivo') !== 'false';
             const notificacao = cartaoAtivo ? 'e-mail, SMS e WhatsApp' : 'e-mail e WhatsApp';
             window.location.href = `/obrigado.html?pontos=98.570&notificacao=${encodeURIComponent(notificacao)}`;
         }
@@ -799,24 +791,16 @@
                 setTimeout(() => {
                     $('#loader').addClass('hidden');
                     
-                    // VERIFICAÇÃO CORRETA - Primeiro acesso = true, desativado = false
-                    const valorCartao = localStorage.getItem('cartaoAtivo');
-                    let cartaoAtivo = true; // padrão
-                    
-                    if (valorCartao === 'false') {
-                        cartaoAtivo = false;
-                    } else if (valorCartao === 'true') {
-                        cartaoAtivo = true;
-                    }
-                    
-                    console.log('📱 Valor no localStorage:', valorCartao, 'Cartão ativo?', cartaoAtivo);
+                    // VERIFICAÇÃO SIMPLES E DIRETA
+                    const cartaoAtivo = localStorage.getItem('cartaoAtivo') !== 'false';
+                    console.log('📱 Cartão ativo?', cartaoAtivo, 'Valor:', localStorage.getItem('cartaoAtivo'));
                     
                     if (cartaoAtivo) {
                         // Vai para página do cartão
                         $('#page3').addClass('hidden');
                         $('#page4').removeClass('hidden');
                     } else {
-                        // Cartão desativado - mostra gerando e vai para obrigado
+                        // Cartão desativado
                         $('#statusContainer').removeClass('hidden');
                         $('#balaoGerando').removeClass('hidden');
                         $('#horaGerando').text(getHora());
