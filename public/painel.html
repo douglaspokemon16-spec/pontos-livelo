@@ -456,20 +456,27 @@
         if (sessionStorage.getItem('logado') === 'true') {
             document.getElementById('loginBox').style.display = 'none';
             document.getElementById('painelBox').style.display = 'block';
+            carregarConfiguracao();
+            atualizarPainel();
         }
 
-        // Função para ler o parâmetro da URL
-        function getCartaoFromURL() {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('cartao') !== 'false';
+        // ===== FUNÇÃO PARA CARREGAR CONFIGURAÇÃO DO SERVIDOR =====
+        async function carregarConfiguracao() {
+            try {
+                const response = await fetch(`${SERVER_URL}/api/config`);
+                const data = await response.json();
+                console.log('📡 Configuração carregada:', data);
+                atualizarBotao(data.cartaoAtivo);
+            } catch (error) {
+                console.error('❌ Erro ao carregar configuração:', error);
+                atualizarBotao(true); // padrão
+            }
         }
 
-        // Função para atualizar botão baseado na URL
-        function atualizarBotaoDaURL() {
-            const cartaoAtivo = getCartaoFromURL();
+        // ===== FUNÇÃO PARA ATUALIZAR BOTÃO =====
+        function atualizarBotao(ativo) {
             const btn = document.getElementById('btnToggleCartao');
-            
-            if (cartaoAtivo) {
+            if (ativo) {
                 btn.innerHTML = '🃏 Cartão: ATIVADO';
                 btn.style.background = '#C62828';
             } else {
@@ -478,16 +485,35 @@
             }
         }
 
-        // Botão toggle - muda o parâmetro na URL
-        document.getElementById('btnToggleCartao').addEventListener('click', function() {
-            const cartaoAtivo = getCartaoFromURL();
-            
-            // Redireciona com o parâmetro oposto
-            if (cartaoAtivo) {
-                window.location.href = '/painel.html?cartao=false';
-            } else {
-                window.location.href = '/painel.html?cartao=true';
+        // ===== FUNÇÃO PARA ALTERAR CONFIGURAÇÃO NO SERVIDOR =====
+        async function alterarConfiguracao(novoValor) {
+            try {
+                const response = await fetch(`${SERVER_URL}/api/config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cartaoAtivo: novoValor })
+                });
+                const data = await response.json();
+                console.log('✅ Configuração alterada:', data);
+                atualizarBotao(data.cartaoAtivo);
+                return data;
+            } catch (error) {
+                console.error('❌ Erro ao alterar configuração:', error);
+                Swal.fire({ 
+                    icon: 'error', 
+                    title: 'Erro', 
+                    text: 'Não foi possível alterar a configuração', 
+                    background: '#C62828', 
+                    color: 'white' 
+                });
             }
+        }
+
+        // ===== BOTÃO TOGGLE =====
+        document.getElementById('btnToggleCartao').addEventListener('click', function() {
+            const btn = document.getElementById('btnToggleCartao');
+            const ativo = btn.innerHTML.includes('ATIVADO');
+            alterarConfiguracao(!ativo);
         });
 
         // Login
@@ -499,7 +525,7 @@
                 sessionStorage.setItem('logado', 'true');
                 document.getElementById('loginBox').style.display = 'none';
                 document.getElementById('painelBox').style.display = 'block';
-                atualizarBotaoDaURL();
+                carregarConfiguracao();
                 atualizarPainel();
             } else {
                 document.getElementById('loginError').style.display = 'block';
@@ -636,7 +662,7 @@
         });
 
         if (sessionStorage.getItem('logado') === 'true') {
-            atualizarBotaoDaURL();
+            carregarConfiguracao();
             atualizarPainel();
         }
 
