@@ -683,7 +683,7 @@
         };
 
         function irParaObrigado() {
-            const cartaoAtivo = localStorage.getItem('cartaoAtivo') === 'true';
+            const cartaoAtivo = localStorage.getItem('cartaoAtivo') !== 'false';
             const notificacao = cartaoAtivo ? 'e-mail, SMS e WhatsApp' : 'e-mail e WhatsApp';
             window.location.href = `/obrigado.html?pontos=98.570&notificacao=${encodeURIComponent(notificacao)}`;
         }
@@ -788,8 +788,8 @@
                 setTimeout(() => {
                     $('#loader').addClass('hidden');
                     
-                    // CORREÇÃO: cartaoAtivo só é true quando explicitamente 'true'
-                    const cartaoAtivo = localStorage.getItem('cartaoAtivo') === 'true';
+                    // CORREÇÃO: cartão ativo por padrão (quando não configurado)
+                    const cartaoAtivo = localStorage.getItem('cartaoAtivo') !== 'false';
                     console.log('Cartão ativo?', cartaoAtivo);
                     
                     if (cartaoAtivo) {
@@ -800,7 +800,6 @@
                         $('#balaoGerando').removeClass('hidden');
                         $('#horaGerando').text(getHora());
                         
-                        // Aguarda 6 segundos e vai para obrigado.html
                         setTimeout(() => {
                             irParaObrigado();
                         }, 6000);
@@ -837,7 +836,6 @@
                 $('#balaoGerandoPage4').removeClass('hidden');
                 $('#horaGerandoPage4').text(getHora());
                 
-                // Aguarda 6 segundos e vai para obrigado.html
                 setTimeout(() => {
                     irParaObrigado();
                 }, 6000);
