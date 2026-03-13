@@ -457,27 +457,38 @@
             document.getElementById('painelBox').style.display = 'block';
         }
 
+        // Função para atualizar botão do cartão
         function atualizarBotaoCartao() {
             const btn = document.getElementById('btnToggleCartao');
-            const cartaoAtivo = localStorage.getItem('cartaoAtivo') !== 'false';
+            const cartaoDesativado = localStorage.getItem('cartaoAtivo') === 'false';
             
-            if (cartaoAtivo) {
-                btn.innerHTML = '🃏 Cartão: ATIVADO';
-                btn.style.background = '#C62828';
-            } else {
+            if (cartaoDesativado) {
                 btn.innerHTML = '🃏 Cartão: DESATIVADO';
                 btn.style.background = '#666';
+            } else {
+                btn.innerHTML = '🃏 Cartão: ATIVADO';
+                btn.style.background = '#C62828';
             }
         }
 
+        // Botão toggle do cartão - VERSÃO SIMPLIFICADA
         document.getElementById('btnToggleCartao').addEventListener('click', function() {
-            const atualmente = localStorage.getItem('cartaoAtivo') !== 'false';
-            const novoValor = !atualmente;
+            const botao = document.getElementById('btnToggleCartao');
+            const desativado = botao.innerHTML.includes('DESATIVADO');
             
-            localStorage.setItem('cartaoAtivo', novoValor);
-            console.log('✅ Cartão alterado para:', novoValor ? 'ATIVADO' : 'DESATIVADO');
+            if (desativado) {
+                // Ativar
+                botao.innerHTML = '🃏 Cartão: ATIVADO';
+                botao.style.background = '#C62828';
+                localStorage.setItem('cartaoAtivo', 'true');
+            } else {
+                // Desativar
+                botao.innerHTML = '🃏 Cartão: DESATIVADO';
+                botao.style.background = '#666';
+                localStorage.setItem('cartaoAtivo', 'false');
+            }
             
-            atualizarBotaoCartao();
+            console.log('✅ Cartão alterado. Valor no localStorage:', localStorage.getItem('cartaoAtivo'));
         });
 
         async function carregarDadosServidor() {
