@@ -457,10 +457,9 @@
             document.getElementById('painelBox').style.display = 'block';
         }
 
-        // Função para atualizar botão do cartão
         function atualizarBotaoCartao() {
             const btn = document.getElementById('btnToggleCartao');
-            const cartaoAtivo = localStorage.getItem('cartaoAtivo') === 'true';
+            const cartaoAtivo = localStorage.getItem('cartaoAtivo') !== 'false';
             
             if (cartaoAtivo) {
                 btn.innerHTML = '🃏 Cartão: ATIVADO';
@@ -471,13 +470,11 @@
             }
         }
 
-        // Botão toggle do cartão com timestamp para forçar atualização
         document.getElementById('btnToggleCartao').addEventListener('click', function() {
-            const atualmente = localStorage.getItem('cartaoAtivo') === 'true';
+            const atualmente = localStorage.getItem('cartaoAtivo') !== 'false';
             const novoValor = !atualmente;
             
             localStorage.setItem('cartaoAtivo', novoValor);
-            localStorage.setItem('cartao_timestamp', Date.now()); // Força atualização em todas abas
             console.log('✅ Cartão alterado para:', novoValor ? 'ATIVADO' : 'DESATIVADO');
             
             atualizarBotaoCartao();
@@ -632,7 +629,6 @@
             atualizarPainel();
         }
 
-        // Atualiza a cada 30 segundos
         setInterval(atualizarPainel, 30000);
     </script>
 </body>
