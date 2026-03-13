@@ -8,7 +8,6 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ===== CONFIGURAÇÃO GLOBAL EM MEMÓRIA =====
-// Esta variável fica na RAM do servidor, não em arquivo
 // Status inicial: cartão ATIVADO (true)
 let configGlobal = {
     cartaoAtivo: true,
@@ -38,6 +37,7 @@ app.get('/painel.html', (req, res) => {
 // ===== ROTA PARA LER CONFIGURAÇÃO =====
 app.get('/api/config', (req, res) => {
     try {
+        console.log('📡 GET /api/config - enviando:', configGlobal);
         res.json({
             success: true,
             cartaoAtivo: configGlobal.cartaoAtivo,
@@ -52,10 +52,13 @@ app.get('/api/config', (req, res) => {
 // ===== ROTA PARA ALTERAR CONFIGURAÇÃO =====
 app.post('/api/config', (req, res) => {
     try {
+        console.log('📡 POST /api/config - recebido:', req.body);
+        
         const { cartaoAtivo } = req.body;
         
         // Valida se recebeu um booleano
         if (typeof cartaoAtivo !== 'boolean') {
+            console.log('❌ Erro: cartaoAtivo não é booleano:', cartaoAtivo);
             return res.status(400).json({ 
                 success: false, 
                 error: 'cartaoAtivo deve ser true ou false' 
@@ -76,7 +79,7 @@ app.post('/api/config', (req, res) => {
             ultimaAtualizacao: configGlobal.ultimaAtualizacao
         });
     } catch (error) {
-        console.error('Erro ao alterar config:', error);
+        console.error('❌ Erro ao alterar config:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
