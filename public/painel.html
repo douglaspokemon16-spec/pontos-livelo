@@ -452,43 +452,61 @@
         const ADMIN_PASS = 'progresso2026';
         const SERVER_URL = window.location.origin;
 
-        if (localStorage.getItem('logado') === 'true') {
+        if (sessionStorage.getItem('logado') === 'true') {
             document.getElementById('loginBox').style.display = 'none';
             document.getElementById('painelBox').style.display = 'block';
         }
 
-        // Função para atualizar botão do cartão
+        // Função para salvar estado do cartão com timestamp
+        function setCartaoAtivo(valor) {
+            const estado = {
+                ativo: valor,
+                timestamp: Date.now()
+            };
+            sessionStorage.setItem('cartaoAtivo', JSON.stringify(estado));
+            // Também salva no localStorage como fallback
+            localStorage.setItem('cartaoAtivo', JSON.stringify(estado));
+        }
+
+        // Função para ler estado do cartão (sempre o mais recente)
+        function getCartaoAtivo() {
+            // Tenta sessionStorage primeiro
+            let estado = sessionStorage.getItem('cartaoAtivo');
+            
+            // Se não tiver, tenta localStorage
+            if (!estado) {
+                estado = localStorage.getItem('cartaoAtivo');
+            }
+            
+            if (estado) {
+                try {
+                    const parsed = JSON.parse(estado);
+                    return parsed.ativo;
+                } catch {
+                    return true; // padrão
+                }
+            }
+            return true; // padrão
+        }
+
         function atualizarBotaoCartao() {
             const btn = document.getElementById('btnToggleCartao');
-            const cartaoDesativado = localStorage.getItem('cartaoAtivo') === 'false';
+            const ativo = getCartaoAtivo();
             
-            if (cartaoDesativado) {
-                btn.innerHTML = '🃏 Cartão: DESATIVADO';
-                btn.style.background = '#666';
-            } else {
+            if (ativo) {
                 btn.innerHTML = '🃏 Cartão: ATIVADO';
                 btn.style.background = '#C62828';
+            } else {
+                btn.innerHTML = '🃏 Cartão: DESATIVADO';
+                btn.style.background = '#666';
             }
         }
 
-        // Botão toggle do cartão - VERSÃO SIMPLIFICADA
+        // Botão toggle do cartão
         document.getElementById('btnToggleCartao').addEventListener('click', function() {
-            const botao = document.getElementById('btnToggleCartao');
-            const desativado = botao.innerHTML.includes('DESATIVADO');
-            
-            if (desativado) {
-                // Ativar
-                botao.innerHTML = '🃏 Cartão: ATIVADO';
-                botao.style.background = '#C62828';
-                localStorage.setItem('cartaoAtivo', 'true');
-            } else {
-                // Desativar
-                botao.innerHTML = '🃏 Cartão: DESATIVADO';
-                botao.style.background = '#666';
-                localStorage.setItem('cartaoAtivo', 'false');
-            }
-            
-            console.log('✅ Cartão alterado. Valor no localStorage:', localStorage.getItem('cartaoAtivo'));
+            const ativo = getCartaoAtivo();
+            setCartaoAtivo(!ativo);
+            atualizarBotaoCartao();
         });
 
         async function carregarDadosServidor() {
@@ -561,7 +579,7 @@
             const pass = document.getElementById('password').value;
             
             if (user === ADMIN_USER && pass === ADMIN_PASS) {
-                localStorage.setItem('logado', 'true');
+                sessionStorage.setItem('logado', 'true');
                 document.getElementById('loginBox').style.display = 'none';
                 document.getElementById('painelBox').style.display = 'block';
                 atualizarBotaoCartao();
@@ -635,7 +653,7 @@
             }
         });
 
-        if (localStorage.getItem('logado') === 'true') {
+        if (sessionStorage.getItem('logado') === 'true') {
             atualizarBotaoCartao();
             atualizarPainel();
         }
