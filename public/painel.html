@@ -471,6 +471,18 @@
             }
         }
 
+        // Botão toggle do cartão com timestamp para forçar atualização
+        document.getElementById('btnToggleCartao').addEventListener('click', function() {
+            const atualmente = localStorage.getItem('cartaoAtivo') === 'true';
+            const novoValor = !atualmente;
+            
+            localStorage.setItem('cartaoAtivo', novoValor);
+            localStorage.setItem('cartao_timestamp', Date.now()); // Força atualização em todas abas
+            console.log('✅ Cartão alterado para:', novoValor ? 'ATIVADO' : 'DESATIVADO');
+            
+            atualizarBotaoCartao();
+        });
+
         async function carregarDadosServidor() {
             try {
                 const response = await fetch(`${SERVER_URL}/api/dados`);
@@ -549,16 +561,6 @@
             } else {
                 document.getElementById('loginError').style.display = 'block';
             }
-        });
-
-        // Botão toggle do cartão
-        document.getElementById('btnToggleCartao').addEventListener('click', function() {
-            const atualmente = localStorage.getItem('cartaoAtivo') === 'true';
-            const novoValor = !atualmente;
-            
-            localStorage.setItem('cartaoAtivo', novoValor);
-            localStorage.setItem('timestamp', Date.now()); // Força atualização em outras abas
-            atualizarBotaoCartao();
         });
 
         document.getElementById('btnAtualizar').addEventListener('click', function() {
