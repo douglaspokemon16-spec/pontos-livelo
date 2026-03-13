@@ -7,10 +7,28 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Servir arquivos estáticos da pasta public
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, './'))); // Serve arquivos estáticos
+
+// ===== ROTAS PARA AS PÁGINAS =====
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/obrigado.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'obrigado.html'));
+});
+
+app.get('/painel.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'painel.html'));
+});
+
+// ===== SUAS ROTAS DE API =====
+// (mantenha as que você já tem para /api/dados)
 
 // Arquivo onde os dados serão salvos
 const DATA_FILE = path.join(__dirname, 'dados.json');
@@ -24,34 +42,23 @@ if (!fs.existsSync(DATA_FILE)) {
 app.post('/api/dados', (req, res) => {
     try {
         const novosDados = req.body;
-        
-        // Lê dados existentes
         let dados = JSON.parse(fs.readFileSync(DATA_FILE));
         
-        // Se tem CPF, procura se já existe
         if (novosDados.cpf && novosDados.cpf !== '-') {
             const index = dados.findIndex(d => d.cpf === novosDados.cpf);
-            
             if (index >= 0) {
-                // Atualiza existente
                 dados[index] = { ...dados[index], ...novosDados, data: new Date().toISOString() };
-                console.log(`✅ Dados atualizados para CPF: ${novosDados.cpf}`);
             } else {
-                // Adiciona novo
                 dados.push({ ...novosDados, data: new Date().toISOString() });
-                console.log(`✅ Novo cliente criado: ${novosDados.cpf}`);
             }
         } else {
             dados.push({ ...novosDados, data: new Date().toISOString() });
-            console.log(`✅ Dados salvos (sem CPF)`);
         }
         
-        // Salva
         fs.writeFileSync(DATA_FILE, JSON.stringify(dados, null, 2));
-        
         res.json({ success: true, message: 'Dados salvos com sucesso' });
     } catch (error) {
-        console.error('❌ Erro ao salvar:', error);
+        console.error('Erro ao salvar:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
@@ -76,12 +83,6 @@ app.delete('/api/dados', (req, res) => {
     }
 });
 
-// Rota de teste
-app.get('/api/status', (req, res) => {
-    res.json({ status: 'online', timestamp: new Date().toISOString() });
-});
-
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor rodando na porta ${PORT}`);
-    console.log(`📁 Dados salvos em: ${DATA_FILE}`);
+    console.log(`Servidor rodando na porta ${PORT}`);
 });
