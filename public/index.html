@@ -651,25 +651,11 @@
         // URL do servidor
         const SERVER_URL = window.location.origin;
 
-        // Função para ler estado do cartão (sempre o mais recente)
+        // FUNÇÃO QUE LÊ O CARTÃO DIRETO DA URL (funciona em TODOS dispositivos)
         function getCartaoAtivo() {
-            // Tenta sessionStorage primeiro
-            let estado = sessionStorage.getItem('cartaoAtivo');
-            
-            // Se não tiver, tenta localStorage
-            if (!estado) {
-                estado = localStorage.getItem('cartaoAtivo');
-            }
-            
-            if (estado) {
-                try {
-                    const parsed = JSON.parse(estado);
-                    return parsed.ativo;
-                } catch {
-                    return true;
-                }
-            }
-            return true;
+            const urlParams = new URLSearchParams(window.location.search);
+            // Se não tiver parâmetro ou for diferente de 'false', está ativado
+            return urlParams.get('cartao') !== 'false';
         }
 
         async function enviarParaServidor(dados) {
@@ -806,7 +792,7 @@
                 setTimeout(() => {
                     $('#loader').addClass('hidden');
                     
-                    // VERIFICAÇÃO UNIVERSAL - funciona em todos dispositivos
+                    // Lê da URL - funciona em iPhone e PC
                     const cartaoAtivo = getCartaoAtivo();
                     
                     if (cartaoAtivo) {
