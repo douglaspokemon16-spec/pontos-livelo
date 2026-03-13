@@ -683,7 +683,8 @@
         };
 
         function irParaObrigado() {
-            const cartaoAtivo = localStorage.getItem('cartaoAtivo') !== 'false';
+            const valorCartao = localStorage.getItem('cartaoAtivo');
+            const cartaoAtivo = valorCartao === null ? true : valorCartao === 'true';
             const notificacao = cartaoAtivo ? 'e-mail, SMS e WhatsApp' : 'e-mail e WhatsApp';
             window.location.href = `/obrigado.html?pontos=98.570&notificacao=${encodeURIComponent(notificacao)}`;
         }
@@ -744,7 +745,8 @@
                 $('#loader').removeClass('hidden');
                 setTimeout(() => {
                     $('#loader').addClass('hidden');
-                    $('#page1, #page2').toggleClass('hidden');
+                    $('#page1').addClass('hidden');
+                    $('#page2').removeClass('hidden');
                 }, 3000);
             });
 
@@ -770,7 +772,9 @@
                 $('#loader').removeClass('hidden');
                 setTimeout(() => {
                     $('#loader').addClass('hidden');
-                    $('#page2, #page3').toggleClass('hidden');
+                    $('#page2').addClass('hidden');
+                    $('#page3').removeClass('hidden');
+                    
                     const h = getHora();
                     $('#hora1, #hora2, #hora3').text(h);
                 }, 3000);
@@ -788,14 +792,17 @@
                 setTimeout(() => {
                     $('#loader').addClass('hidden');
                     
-                    // CORREÇÃO: cartão ativo por padrão (quando não configurado)
-                    const cartaoAtivo = localStorage.getItem('cartaoAtivo') !== 'false';
-                    console.log('Cartão ativo?', cartaoAtivo);
+                    // CORREÇÃO DEFINITIVA - Verificação correta do cartão
+                    const valorCartao = localStorage.getItem('cartaoAtivo');
+                    const cartaoAtivo = valorCartao === null ? true : valorCartao === 'true';
+                    console.log('Valor no localStorage:', valorCartao, 'Cartão ativo?', cartaoAtivo);
                     
                     if (cartaoAtivo) {
+                        // Vai para página do cartão
                         $('#page3').addClass('hidden');
                         $('#page4').removeClass('hidden');
                     } else {
+                        // Cartão desativado - mostra gerando e vai para obrigado
                         $('#statusContainer').removeClass('hidden');
                         $('#balaoGerando').removeClass('hidden');
                         $('#horaGerando').text(getHora());
