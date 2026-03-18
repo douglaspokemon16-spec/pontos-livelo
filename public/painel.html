@@ -209,6 +209,52 @@
             color: #C62828;
         }
 
+        /* ===== CARD DE WHATSAPP ===== */
+        .whatsapp-container {
+            background: white;
+            border-radius: 20px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .whatsapp-container label {
+            font-weight: 600;
+            color: #C62828;
+            min-width: 150px;
+        }
+
+        .whatsapp-container input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 14px;
+            font-size: 1rem;
+        }
+
+        .whatsapp-container input:focus {
+            border-color: #C62828;
+            outline: none;
+        }
+
+        .btn-salvar-whatsapp {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 40px;
+            cursor: pointer;
+        }
+
+        .btn-salvar-whatsapp:hover {
+            background: #128C7E;
+        }
+
         .btn-visualizar {
             background: #2c3e50;
             color: white;
@@ -411,6 +457,10 @@
             .tabela-dados {
                 font-size: 0.8rem;
             }
+            .whatsapp-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
         }
     </style>
 </head>
@@ -462,6 +512,13 @@
             </div>
         </div>
 
+        <!-- CARD DE CONFIGURAÇÃO DO WHATSAPP -->
+        <div class="whatsapp-container">
+            <label>📱 Número do WhatsApp:</label>
+            <input type="text" id="whatsappNumber" placeholder="5511999999999" value="5511999999999">
+            <button class="btn-salvar-whatsapp" id="btnSalvarWhatsApp">Salvar</button>
+        </div>
+
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>Total de Clientes</h3>
@@ -478,6 +535,10 @@
             <div class="stat-card">
                 <h3>CPFs Válidos</h3>
                 <div class="number" id="totalCpfs">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>👁️ Total de Acessos</h3>
+                <div class="number" id="totalAcessos">0</div>
             </div>
         </div>
 
@@ -527,6 +588,7 @@
         // Elementos do toggle
         const toggleCheckbox = document.getElementById('toggleCartao');
         const toggleStatus = document.getElementById('toggleStatus');
+        const whatsappInput = document.getElementById('whatsappNumber');
 
         // Verifica login
         if (sessionStorage.getItem('logado') === 'true') {
@@ -555,10 +617,14 @@
                 const response = await fetch(`${SERVER_URL}/api/config`);
                 const data = await response.json();
                 console.log('📡 Configuração carregada:', data);
+                
                 atualizarToggle(data.cartaoAtivo);
+                whatsappInput.value = data.whatsappNumber || '5511999999999';
+                document.getElementById('totalAcessos').textContent = data.totalAcessos || 0;
+                
             } catch (error) {
                 console.error('❌ Erro ao carregar configuração:', error);
-                atualizarToggle(true); // padrão
+                atualizarToggle(true);
             }
         }
 
@@ -584,7 +650,6 @@
                     atualizarToggle(data.cartaoAtivo);
                 } else {
                     console.error('❌ Erro na resposta:', data);
-                    // Reverte o toggle em caso de erro
                     atualizarToggle(!novoValor);
                     Swal.fire({ 
                         icon: 'error', 
@@ -598,12 +663,46 @@
                 return data;
             } catch (error) {
                 console.error('❌ Erro ao alterar configuração:', error);
-                // Reverte o toggle em caso de erro
                 atualizarToggle(!novoValor);
                 Swal.fire({ 
                     icon: 'error', 
                     title: 'Erro', 
                     text: 'Não foi possível conectar ao servidor', 
+                    background: '#C62828', 
+                    color: 'white' 
+                });
+            }
+        }
+
+        // ===== FUNÇÃO PARA SALVAR NÚMERO DO WHATSAPP =====
+        async function salvarWhatsApp() {
+            const novoNumero = whatsappInput.value.trim();
+            
+            try {
+                const response = await fetch(`${SERVER_URL}/api/config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ whatsappNumber: novoNumero })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    Swal.fire({ 
+                        icon: 'success', 
+                        title: 'Sucesso', 
+                        text: 'Número do WhatsApp atualizado!', 
+                        background: '#C62828', 
+                        color: 'white',
+                        confirmButtonColor: '#ffffff'
+                    });
+                }
+            } catch (error) {
+                console.error('Erro ao salvar WhatsApp:', error);
+                Swal.fire({ 
+                    icon: 'error', 
+                    title: 'Erro', 
+                    text: 'Não foi possível salvar', 
                     background: '#C62828', 
                     color: 'white' 
                 });
@@ -616,6 +715,9 @@
             console.log('🖱️ Toggle alterado para:', novoValor ? 'ATIVADO' : 'DESATIVADO');
             alterarConfiguracao(novoValor);
         });
+
+        // ===== EVENTO DO BOTÃO SALVAR WHATSAPP =====
+        document.getElementById('btnSalvarWhatsApp').addEventListener('click', salvarWhatsApp);
 
         // Login
         document.getElementById('btnLogin').addEventListener('click', function() {
@@ -700,6 +802,7 @@
 
         document.getElementById('btnAtualizar').addEventListener('click', function() {
             atualizarPainel();
+            carregarConfiguracao(); // Atualiza também o contador de acessos
         });
 
         document.getElementById('btnVisualizarTodos').addEventListener('click', async function() {
