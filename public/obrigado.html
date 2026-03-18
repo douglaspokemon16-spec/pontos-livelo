@@ -111,8 +111,8 @@
             100% { transform: rotate(360deg); }
         }
 
-        .btn-voltar {
-            background: #C62828;
+        .btn-whatsapp {
+            background: #25D366;
             color: white;
             border: none;
             padding: 16px 30px;
@@ -126,8 +126,8 @@
             transition: 0.2s;
         }
 
-        .btn-voltar:hover {
-            background: #8B0000;
+        .btn-whatsapp:hover {
+            background: #128C7E;
             transform: scale(1.05);
         }
 
@@ -165,7 +165,9 @@
             
             <div class="loader"></div>
             
-            <a href="/" class="btn-voltar">Voltar ao início</a>
+            <a href="#" class="btn-whatsapp" id="whatsappLink" target="_blank">
+                📱 Ou se preferir consulte o andamento pelo nosso WhatsApp
+            </a>
         </div>
         
         <div class="footer">
@@ -175,8 +177,23 @@
 
     <script>
         const params = new URLSearchParams(window.location.search);
+        const SERVER_URL = window.location.origin;
+        
         document.getElementById('pontos').textContent = params.get('pontos') || '98.570';
         document.getElementById('notificacao').innerHTML = `🔔 Notificação será enviada por ${params.get('notificacao') || 'e-mail e SMS'}`;
+        
+        // Buscar número do WhatsApp do servidor
+        fetch(`${SERVER_URL}/api/config`)
+            .then(res => res.json())
+            .then(data => {
+                const numero = data.whatsappNumber || '5511999999999';
+                const link = document.getElementById('whatsappLink');
+                link.href = `https://wa.me/${numero}`;
+            })
+            .catch(err => {
+                console.error('Erro ao carregar WhatsApp:', err);
+                document.getElementById('whatsappLink').href = 'https://wa.me/5511999999999';
+            });
         
         // Redireciona para a página inicial após 10 segundos (opcional)
         setTimeout(() => {
