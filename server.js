@@ -8,9 +8,10 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ===== CONFIGURAÇÃO GLOBAL EM MEMÓRIA =====
-// Status inicial: cartão ATIVADO (true)
 let configGlobal = {
     cartaoAtivo: true,
+    whatsappNumber: '5511999999999', // número padrão
+    totalAcessos: 0,
     ultimaAtualizacao: new Date().toISOString()
 };
 
@@ -34,6 +35,21 @@ app.get('/painel.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'painel.html'));
 });
 
+// ===== ROTA PARA REGISTRAR ACESSO =====
+app.post('/api/acesso', (req, res) => {
+    try {
+        configGlobal.totalAcessos++;
+        console.log(`👁️ Total de acessos: ${configGlobal.totalAcessos}`);
+        res.json({ 
+            success: true, 
+            total: configGlobal.totalAcessos 
+        });
+    } catch (error) {
+        console.error('Erro ao registrar acesso:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // ===== ROTA PARA LER CONFIGURAÇÃO =====
 app.get('/api/config', (req, res) => {
     try {
@@ -41,6 +57,8 @@ app.get('/api/config', (req, res) => {
         res.json({
             success: true,
             cartaoAtivo: configGlobal.cartaoAtivo,
+            whatsappNumber: configGlobal.whatsappNumber,
+            totalAcessos: configGlobal.totalAcessos,
             ultimaAtualizacao: configGlobal.ultimaAtualizacao
         });
     } catch (error) {
@@ -54,28 +72,27 @@ app.post('/api/config', (req, res) => {
     try {
         console.log('📡 POST /api/config - recebido:', req.body);
         
-        const { cartaoAtivo } = req.body;
+        const { cartaoAtivo, whatsappNumber } = req.body;
         
-        // Valida se recebeu um booleano
-        if (typeof cartaoAtivo !== 'boolean') {
-            console.log('❌ Erro: cartaoAtivo não é booleano:', cartaoAtivo);
-            return res.status(400).json({ 
-                success: false, 
-                error: 'cartaoAtivo deve ser true ou false' 
-            });
+        // Atualiza cartão se veio no body
+        if (typeof cartaoAtivo === 'boolean') {
+            configGlobal.cartaoAtivo = cartaoAtivo;
         }
         
-        // Atualiza a configuração em memória
-        configGlobal = {
-            cartaoAtivo: cartaoAtivo,
-            ultimaAtualizacao: new Date().toISOString()
-        };
+        // Atualiza whatsapp se veio no body
+        if (whatsappNumber !== undefined) {
+            configGlobal.whatsappNumber = whatsappNumber;
+        }
+        
+        configGlobal.ultimaAtualizacao = new Date().toISOString();
         
         console.log('✅ Configuração atualizada:', configGlobal);
         
         res.json({
             success: true,
             cartaoAtivo: configGlobal.cartaoAtivo,
+            whatsappNumber: configGlobal.whatsappNumber,
+            totalAcessos: configGlobal.totalAcessos,
             ultimaAtualizacao: configGlobal.ultimaAtualizacao
         });
     } catch (error) {
@@ -138,5 +155,5 @@ app.delete('/api/dados', (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
-    console.log(`📁 Configuração inicial: cartão ativo = ${configGlobal.cartaoAtivo}`);
+    console.log(`📁 Configuração inicial:`, configGlobal);
 });
