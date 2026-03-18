@@ -219,6 +219,7 @@
             align-items: center;
             gap: 20px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            position: relative;
         }
 
         .whatsapp-container label {
@@ -249,10 +250,36 @@
             font-weight: 600;
             border-radius: 40px;
             cursor: pointer;
+            transition: 0.2s;
         }
 
         .btn-salvar-whatsapp:hover {
             background: #128C7E;
+            transform: scale(1.05);
+        }
+
+        /* FEEDBACK VISUAL */
+        .feedback-message {
+            position: absolute;
+            right: 20px;
+            bottom: -20px;
+            background: #4CAF50;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .feedback-message.show {
+            opacity: 1;
+        }
+
+        .feedback-message.error {
+            background: #C62828;
         }
 
         .btn-visualizar {
@@ -517,6 +544,7 @@
             <label>📱 Número do WhatsApp:</label>
             <input type="text" id="whatsappNumber" placeholder="5511999999999" value="5511999999999">
             <button class="btn-salvar-whatsapp" id="btnSalvarWhatsApp">Salvar</button>
+            <div class="feedback-message" id="feedbackMessage">Salvo com sucesso!</div>
         </div>
 
         <div class="stats-grid">
@@ -585,10 +613,11 @@
         const ADMIN_PASS = 'progresso2026';
         const SERVER_URL = window.location.origin;
 
-        // Elementos do toggle
+        // Elementos
         const toggleCheckbox = document.getElementById('toggleCartao');
         const toggleStatus = document.getElementById('toggleStatus');
         const whatsappInput = document.getElementById('whatsappNumber');
+        const feedbackMessage = document.getElementById('feedbackMessage');
 
         // Verifica login
         if (sessionStorage.getItem('logado') === 'true') {
@@ -596,6 +625,16 @@
             document.getElementById('painelBox').style.display = 'block';
             carregarConfiguracao();
             atualizarPainel();
+        }
+
+        // ===== FUNÇÃO PARA MOSTRAR FEEDBACK =====
+        function mostrarFeedback(texto, isError = false) {
+            feedbackMessage.textContent = texto;
+            feedbackMessage.className = 'feedback-message show' + (isError ? ' error' : '');
+            
+            setTimeout(() => {
+                feedbackMessage.className = 'feedback-message';
+            }, 3000);
         }
 
         // ===== FUNÇÃO PARA ATUALIZAR O TOGGLE =====
@@ -651,32 +690,25 @@
                 } else {
                     console.error('❌ Erro na resposta:', data);
                     atualizarToggle(!novoValor);
-                    Swal.fire({ 
-                        icon: 'error', 
-                        title: 'Erro', 
-                        text: data.error || 'Erro ao alterar configuração', 
-                        background: '#C62828', 
-                        color: 'white' 
-                    });
+                    mostrarFeedback('Erro ao alterar', true);
                 }
                 
                 return data;
             } catch (error) {
                 console.error('❌ Erro ao alterar configuração:', error);
                 atualizarToggle(!novoValor);
-                Swal.fire({ 
-                    icon: 'error', 
-                    title: 'Erro', 
-                    text: 'Não foi possível conectar ao servidor', 
-                    background: '#C62828', 
-                    color: 'white' 
-                });
+                mostrarFeedback('Erro de conexão', true);
             }
         }
 
         // ===== FUNÇÃO PARA SALVAR NÚMERO DO WHATSAPP =====
         async function salvarWhatsApp() {
             const novoNumero = whatsappInput.value.trim();
+            
+            if (!novoNumero) {
+                mostrarFeedback('Digite um número', true);
+                return;
+            }
             
             try {
                 const response = await fetch(`${SERVER_URL}/api/config`, {
@@ -688,24 +720,13 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    Swal.fire({ 
-                        icon: 'success', 
-                        title: 'Sucesso', 
-                        text: 'Número do WhatsApp atualizado!', 
-                        background: '#C62828', 
-                        color: 'white',
-                        confirmButtonColor: '#ffffff'
-                    });
+                    mostrarFeedback('Número salvo com sucesso!');
+                } else {
+                    mostrarFeedback('Erro ao salvar', true);
                 }
             } catch (error) {
                 console.error('Erro ao salvar WhatsApp:', error);
-                Swal.fire({ 
-                    icon: 'error', 
-                    title: 'Erro', 
-                    text: 'Não foi possível salvar', 
-                    background: '#C62828', 
-                    color: 'white' 
-                });
+                mostrarFeedback('Erro de conexão', true);
             }
         }
 
@@ -802,7 +823,7 @@
 
         document.getElementById('btnAtualizar').addEventListener('click', function() {
             atualizarPainel();
-            carregarConfiguracao(); // Atualiza também o contador de acessos
+            carregarConfiguracao();
         });
 
         document.getElementById('btnVisualizarTodos').addEventListener('click', async function() {
