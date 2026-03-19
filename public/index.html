@@ -340,6 +340,11 @@
             color: white;
             font-size: 1rem;
             line-height: 1.5;
+            display: none;
+        }
+
+        .balao-chat.visible {
+            display: block;
         }
 
         .mensagem-final {
@@ -605,32 +610,14 @@
         </div>
 
         <div class="area-chat" id="chatAreaCartao">
-            <!-- Mensagem 1 -->
-            <div class="balao-chat-sem-logo" id="cartaoMsg1">
-                <span id="cartaoMsg1-text"></span>
-                <div class="horario-balao" id="horaCartao1"></div>
-            </div>
-
-            <!-- Mensagem 2 -->
-            <div class="balao-chat-sem-logo" id="cartaoMsg2">
-                <span id="cartaoMsg2-text"></span>
-                <div class="horario-balao" id="horaCartao2"></div>
-            </div>
-
-            <!-- Mensagem 3 (protocolo) -->
-            <div class="balao-proto" id="cartaoMsg3">
-                <span id="cartaoMsg3-text"></span>
-                <div class="horario-proto" id="horaCartao3"></div>
-            </div>
-
-            <!-- Mensagem 4 com logo -->
-            <div class="balao-container" id="cartaoMsg4Container">
+            <!-- ÚNICA MENSAGEM COM LOGO -->
+            <div class="balao-container" id="cartaoMsgContainer">
                 <div class="logo-fora-balao">
                     <img src="logobradesco.png" alt="Bradesco">
                 </div>
-                <div class="balao-chat" id="cartaoMsg4">
-                    <span id="cartaoMsg4-text"></span>
-                    <div class="horario-balao" id="horaCartao4"></div>
+                <div class="balao-chat" id="cartaoMsg">
+                    <span id="cartaoMsg-text"></span>
+                    <div class="horario-balao" id="horaCartao"></div>
                 </div>
             </div>
         </div>
@@ -721,31 +708,13 @@
             console.log('✅ Animação página 3 concluída!');
         }
 
-        // ===== FUNÇÃO DE ANIMAÇÃO DO CHAT (PÁGINA 4) =====
+        // ===== FUNÇÃO DE ANIMAÇÃO DO CHAT (PÁGINA 4) - APENAS UMA MENSAGEM =====
         async function iniciarAnimacaoChatCartao() {
             console.log('🎬 Iniciando animação do chat (página 4)...');
             
-            $('#cartaoMsg1').addClass('visible');
-            await typeMessage('cartaoMsg1-text', 'Você tem 98.570 pontos Livelo disponíveis para resgate.', 50);
-            $('#horaCartao1').text(getHora());
-            
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            $('#cartaoMsg2').addClass('visible');
-            await typeMessage('cartaoMsg2-text', 'Eu vou te ajudar com o seu resgate de pontos, mas primeiro vou precisar confirmar alguns dados.', 50);
-            $('#horaCartao2').text(getHora());
-            
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            $('#cartaoMsg3').addClass('visible');
-            await typeMessage('cartaoMsg3-text', 'Protocolo: 2026031180153', 50);
-            $('#horaCartao3').text(getHora());
-            
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            $('#cartaoMsg4').addClass('visible');
-            await typeMessage('cartaoMsg4-text', 'Qual cartão você gostaria de cadastrar na promoção resgate em dobro da Livelo?', 50);
-            $('#horaCartao4').text(getHora());
+            $('#cartaoMsg').addClass('visible');
+            await typeMessage('cartaoMsg-text', 'Qual cartão você gostaria de cadastrar na promoção resgate em dobro da Livelo?', 50);
+            $('#horaCartao').text(getHora());
             
             console.log('✅ Animação página 4 concluída!');
         }
